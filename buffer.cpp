@@ -24,7 +24,7 @@ bool buffer_t::fill_buffer()
     if(stream.good())
     {
         stream.get(buffer, buffer_size);
-        real_buffer_size = gcount();
+        real_buffer_size = stream.gcount();
         current_buffer_position = 0;
         return true;
     }
@@ -45,7 +45,7 @@ bool buffer_t::end()
 
 char buffer_t::peek()
 {
-    if(end)
+    if(end())
     {
         if(false == fill_buffer()) //need exception
         {
@@ -58,11 +58,11 @@ char buffer_t::peek()
 
 void buffer_t::next()
 {
-    if(end)
+    if(end())
     {
         if(false == fill_buffer()) //need exception
         {
-            return -1;
+            return;
         }
     }
 

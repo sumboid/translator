@@ -1,4 +1,4 @@
-#include <iostream>
+#include <istream>
 
 
 class buffer_t
@@ -8,7 +8,7 @@ public:
     ~buffer_t();
 
     char peek();
-    char next();
+    void next();
 private:
     size_t buffer_size;
     size_t real_buffer_size;
