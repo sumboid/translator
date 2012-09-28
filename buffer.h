@@ -1,5 +1,7 @@
-#include <istream>
+#ifndef BUFFER_H
+#define BUFFER_H
 
+#include <istream>
 
 class buffer_t
 {
@@ -21,3 +23,5 @@ private:
     bool end();
     bool fill_buffer();
 };
+
+#endif /* end of include guard: BUFFER_H */
