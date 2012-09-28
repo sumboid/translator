@@ -1,14 +1,10 @@
 #include "buffer.h"
 
-namespace
-{
-    const size_t DEFAULT_BUFFER_SIZE = 512;
-}
 
 using std::istream;
 
-buffer_t::buffer_t(istream& _stream, size_t _buffer_size = DEFAULT_BUFFER_SIZE)
-    :stream(stream), buffer_size(_buffer_size)
+buffer_t::buffer_t(istream& _stream, size_t _buffer_size)
+    :stream(_stream), buffer_size(_buffer_size)
 {
     buffer = new char[buffer_size];
     fill_buffer();
@@ -21,7 +17,7 @@ buffer_t::~buffer_t()
 
 bool buffer_t::fill_buffer()
 {
-    if(stream.good())
+    if(!stream.eof())
     {
         stream.get(buffer, buffer_size);
         real_buffer_size = stream.gcount();
@@ -49,7 +45,7 @@ char buffer_t::peek()
     {
         if(false == fill_buffer()) //need exception
         {
-            return -1;
+            return 0; //XXX
         }
     }
 

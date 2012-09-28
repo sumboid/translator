@@ -3,10 +3,15 @@
 
 #include <istream>
 
+namespace
+{
+    const size_t DEFAULT_BUFFER_SIZE = 512;
+}
+
 class buffer_t
 {
 public:
-    buffer_t(std::istream& stream, size_t buffer_size);
+    buffer_t(std::istream& stream, size_t buffer_size = DEFAULT_BUFFER_SIZE);
     ~buffer_t();
 
     char peek();
