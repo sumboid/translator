@@ -63,7 +63,7 @@ void lexer_t::next()
                 }
                 else
                 {
-                    throw 1;
+                    throw 1; //TODO
                 }
             }
 
