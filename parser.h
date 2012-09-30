@@ -1,6 +1,9 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <istream>
+#include "lexer.h"
+
 class parser_t {
 public:
     parser_t (std::istream& stream);
