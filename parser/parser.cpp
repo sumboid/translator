@@ -1,12 +1,14 @@
+#include <iostream>
 #include <string>
 #include <cmath>
 #include <cstdlib>
 #include "parser.h"
-#include "token.h"
-
+#include "../lexer/token.h"
 
 parser_t::parser_t(std::istream& stream)
-    :lexer(new lexer_t(stream))
+    :lexer(new lexer_t(stream)), parsed(false),
+     ast_root(new astree_t(new syntaxunit_t("program"))),
+     ast_current(ast_root)
 {}
 
 parser_t::~parser_t()
@@ -24,9 +26,19 @@ bool check(token_t token, const std::string& cmp)
     return 0 == token.value.compare(cmp);
 }
 
-int parser_t::parse_expr()
+astree_t get_ast()
 {
-    int result = parse_fact();
+    if(!parsed)
+    {
+        parse();
+    }
+
+    return ast;
+}
+
+void parser_t::parse_expr()
+{
+    parse_fact();
 
     while(true)
     {
@@ -47,14 +59,14 @@ int parser_t::parse_expr()
     return result;
 }
 
-int parser_t::parse_fact()
-{    
+void parser_t::parse_fact()
+{
     int result = parse_pow();
 
     while(true)
     {
         token_t token = lexer->peek();
-        
+
         if(check(token, "*"))
         {
             lexer->next();
@@ -67,11 +79,10 @@ int parser_t::parse_fact()
         }
         else break;
     }
-
     return result;
 }
 
-int parser_t::parse_pow()
+void parser_t::parse_pow()
 {
     int result = parse_number();
     token_t token = lexer->peek();
@@ -81,11 +92,10 @@ int parser_t::parse_pow()
         lexer->next();
         result = pow(result, parse_pow());
     }
-
     return result;
 }
 
-int parser_t::parse_number()
+void parser_t::parse_number()
 {
     token_t token = lexer->peek();
     if(token.type == NUMBER)

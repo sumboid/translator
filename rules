@@ -1,0 +1,13 @@
+program             ::= definition; definition-list
+definition-list     ::= ε | definition; definition-list
+definition          ::= def-function | def-variable
+def-variable        ::= type identifier | type identifier = expr
+def-function        ::= type identifier (args) { statement-list }
+args                ::= type identifier, args | ε
+statement-list      ::= def-variable statement-list |
+                        assign-statement statement-list |
+                        return-statement statement-list |
+                        ε
+assign-statement    ::= identifier = expr
+return-statement    ::= return expr
+
