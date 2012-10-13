@@ -1,9 +1,9 @@
 cxx      := g++
 cxxflags := -O3
 objs     := main.o \
-			buffer.o \
-			lexer.o \
-			parser.o
+			lexer/buffer.o \
+			lexer/lexer.o \
+			parser/parser.o
 bin      := t
 
 all: $(bin)
