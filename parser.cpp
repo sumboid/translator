@@ -14,7 +14,7 @@ parser_t::~parser_t()
     delete lexer;
 }
 
-int parser_t::parse()
+Tree* parser_t::parse()
 {
     return parse_expr();
 }
@@ -54,7 +54,7 @@ int parser_t::parse_fact()
     while(true)
     {
         token_t token = lexer->peek();
-        
+
         if(check(token, "*"))
         {
             lexer->next();
