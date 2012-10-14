@@ -16,6 +16,7 @@ public:
     void add_unit(const syntaxunit_t&);
     syntaxunit_t get_unit();
     bool is_leaf();
+    void swap();
 private:
     std::vector<astree_t*> childs;
     astree_t* previous;

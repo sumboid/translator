@@ -45,13 +45,21 @@ void parser_t::parse_expr()
         token_t token = lexer->peek();
         if(check(token, "+"))
         {
+            syntaxunit_t add_unit = new syntaxunit_t(ADD);
+            ast_current->add_child(add_unit);
+            ast_current = add_unit;
+            ast_current->swap();
             lexer->next();
-            result += parse_fact();
+            parse_fact();
         }
         else if(check(token, "-"))
         {
+            syntaxunit_t sub_unit = new syntaxunit_t(SUB);
+            ast_current->add_child(sub_unit);
+            ast_current = sub_unit;
+            ast_current->swap();
             lexer->next();
-            result -= parse_fact();
+            parse_fact();
         }
         else break;
     }
@@ -69,13 +77,21 @@ void parser_t::parse_fact()
 
         if(check(token, "*"))
         {
+            syntaxunit_t mul_unit = new syntaxunit_t(MUL);
+            ast_current->add_child(mul_unit);
+            ast_current = mul_unit;
+            ast_current->swap();
             lexer->next();
-            result *= parse_pow();
+            parse_pow();
         }
         else if(check(token, "/"))
         {
+            syntaxunit_t div_unit = new syntaxunit_t(DIV);
+            ast_current->add_child(div_unit);
+            ast_current = div_unit;
+            ast_current->swap();
             lexer->next();
-            result /= parse_pow();
+            parse_pow();
         }
         else break;
     }
@@ -101,17 +117,16 @@ void parser_t::parse_number()
     if(token.type == NUMBER)
     {
         lexer->next();
-        return atoi(token.value.c_str());
+        ast_current->add_child(new syntaxunit_t(NUMBER, token.value));
     }
     else if(token.type == BRACKET && check(token, "("))
     {
         lexer->next();
-        int result = parse_expr();
+        parse_expr();
         token = lexer->peek();
         if(token.type == BRACKET && check(token, ")"))
         {
             lexer->next();
-            return result;
         }
         else
         {
@@ -123,3 +138,5 @@ void parser_t::parse_number()
         throw -1;
     }
 }
+
+void add_

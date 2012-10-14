@@ -69,3 +69,26 @@ bool astree_t::is_leaf()
 {
     return !childs.empty();
 }
+
+void swap() //XXX //XXX //XXX //XXX //XXX
+{
+    if(!has_unit())
+    {
+        throw logic_error(NO_UNIT_ERROR);
+    }
+
+    syntaxunit_t* parent = previous;
+    childs = parent->childs;
+
+    vector<syntaxunit_t>::iterator it;
+    pparent = parent->previous;
+    it = find(pparent->childs.begin(), pparent->childs.end(), parent);
+    *it = this;
+
+    childs.push_back(parent);
+
+    for(int i = 0; i < childs.size(); i++)
+    {
+        childs[i]->previous = this;
+    }
+}
