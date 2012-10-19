@@ -6,8 +6,8 @@
 #include "syntaxtype.h"
 #include "../lexer/token.h"
 
-parser_t::parser_t(std::istream& stream)
-    :lexer(new lexer_t(stream)), parsed(false)
+    parser_t::parser_t(std::istream& stream)
+:lexer(new lexer_t(stream)), parsed(false)
 {}
 
 parser_t::~parser_t()
@@ -42,28 +42,31 @@ astree_t* parser_t::parse_expr()
 {
     astree_t* left = parse_fact();
     astree_t* local_root = left;
-    token_t token = lexer->peek();
 
-    if(check(token, "+"))
+    while(true)
     {
-        std::cout << "+" << std::endl;
-        syntaxunit_t add_unit(syntaxtype::ADD);
-        local_root = new astree_t(add_unit);
-    }
-    else if(check(token, "-"))
-    {
-        syntaxunit_t sub_unit(syntaxtype::SUB);
-        local_root = new astree_t(sub_unit);
-    }
-    else
-    {
-        return local_root;
-    }
+        token_t token = lexer->peek();
+        syntaxunit_t current_unit;
+        if(check(token, "+"))
+        {
+            current_unit = syntaxunit_t(syntaxtype::ADD);
+        }
+        else if(check(token, "-"))
+        {
+            current_unit = syntaxunit_t(syntaxtype::SUB);
+        }
+        else
+        {
+            break;
+        }
 
-    local_root->add_child(left);
-    lexer->next();
-    astree_t* right = parse_expr();
-    local_root->add_child(right);
+        left = local_root;
+        local_root = new astree_t(current_unit);
+        local_root->add_child(left);
+        lexer->next();
+        astree_t* right = parse_fact();
+        local_root->add_child(right);
+    }
 
     return local_root;
 }
@@ -72,27 +75,31 @@ astree_t* parser_t::parse_fact()
 {
     astree_t* left = parse_pow();
     astree_t* local_root = left;
-    token_t token = lexer->peek();
 
-    if(check(token, "*"))
+    while(true)
     {
-        syntaxunit_t mul_unit(syntaxtype::MUL);
-        local_root = new astree_t(mul_unit);
-    }
-    else if(check(token, "/"))
-    {
-        syntaxunit_t div_unit(syntaxtype::DIV);
-        local_root = new astree_t(div_unit);
-    }
-    else
-    {
-        return local_root;
-    }
+        token_t token = lexer->peek();
+        syntaxunit_t current_unit;
+        if(check(token, "*"))
+        {
+            current_unit = syntaxunit_t(syntaxtype::MUL);
+        }
+        else if(check(token, "/"))
+        {
+            current_unit = syntaxunit_t(syntaxtype::DIV);
+        }
+        else
+        {
+            break;
+        }
 
-    local_root->add_child(left);
-    lexer->next();
-    astree_t* right = parse_fact();
-    local_root->add_child(right);
+        left = local_root;
+        local_root = new astree_t(current_unit);
+        local_root->add_child(left);
+        lexer->next();
+        astree_t* right = parse_pow();
+        local_root->add_child(right);
+    }
 
     return local_root;
 }
@@ -109,8 +116,8 @@ astree_t* parser_t::parse_pow()
         local_root = new astree_t(pow_unit);
         lexer->next();
         astree_t* left = parse_pow();
-        local_root->add_child(left);
         local_root->add_child(right);
+        local_root->add_child(left);
     }
     return local_root;
 }

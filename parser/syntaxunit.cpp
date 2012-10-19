@@ -10,6 +10,8 @@ namespace
 using std::string;
 using std::logic_error;
 
+syntaxunit_t::syntaxunit_t() {}
+
 syntaxunit_t::syntaxunit_t(const string& _unit_name)
     :unit_name(_unit_name)
 {}
