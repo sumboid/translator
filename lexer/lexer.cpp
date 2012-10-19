@@ -6,16 +6,22 @@
 using std::string;
 using std::map;
 
-lexer_t::lexer_t(std::istream& stream)
-    :buffer(stream)
+    lexer_t::lexer_t(std::istream& stream)
+:buffer(stream)
 {
-    terminals['+'] = OPERATOR;
-    terminals['-'] = OPERATOR;
-    terminals['*'] = OPERATOR;
-    terminals['/'] = OPERATOR;
-    terminals['^'] = OPERATOR;
-    terminals['('] = BRACKET;
-    terminals[')'] = BRACKET;
+    terminals["+"] = OPERATOR;
+    terminals["-"] = OPERATOR;
+    terminals["*"] = OPERATOR;
+    terminals["/"] = OPERATOR;
+    terminals["^"] = OPERATOR;
+
+    terminals["("] = BRACKET;
+    terminals[")"] = BRACKET;
+
+    terminals[";"] = DELIMITER;
+
+    terminals["int"] = TYPE;
+    terminals["double"] = TYPE;
     next(); //get first token
 }
 
@@ -26,62 +32,123 @@ token_t lexer_t::peek()
 
 void lexer_t::next()
 {
+    flush_spaces();
+    bool token_finded = check_eof()                      ||
+                        check_number()                   ||
+                        check_one_symbol_terminal()      ||
+                        check_several_symbols_terminal() ;
+    if(!token_finded)
+    {
+        throw 1;
+    }
+}
+
+bool lexer_t::check_several_symbols_terminal()
+{
     string token;
-    bool number = false;
+
     while(true)
     {
         char current = buffer.peek();
-        if(!number)
+        string current_str;
+        current_str.push_back(current);
+        if(current == 0 || current == ' ' || is_terminal(current_str))
         {
-            if(current == 0)
+            if(token.empty())
             {
-                current_token.value = "";
-                current_token.type = END_OF_FILE;
-                break;
-            }
-            if(current == ' ' || current == '\n')
-            {
-                buffer.next();
-                continue;
-            }
-            else if(isdigit(current))
-            {
-                number = true;
-                token.push_back(current);
-                buffer.next();
-                continue;
+                return false; //XXX: logic error
             }
             else
             {
-                map<char, token_type>::iterator it = terminals.find(current);
-                if(it != terminals.end())
-                {
-                    current_token.type = it->second;
-                    current_token.value = it->first;
-                    buffer.next();
-                    break;
-                }
-                else
-                {
-                    throw 1; //TODO
-                }
+                current_token.type = VARIABLE;
+                current_token.value = token;
+                return true;
             }
+        }
 
+        token.push_back(current);
+        if(is_terminal(token))
+        {
+            map<string, token_type>::iterator it = terminals.find(token);
+            current_token.type = it->second;
+            current_token.value = it->first;
+            return true;
+        }
+
+        buffer.next();
+    }
+}
+
+bool lexer_t::check_one_symbol_terminal()
+{
+    string token;
+    token.push_back(buffer.peek());
+
+    if(is_terminal(token))
+    {
+        map<string, token_type>::iterator it = terminals.find(token);
+        current_token.type = it->second;
+        current_token.value = it->first;
+        buffer.next();
+        return true;
+    }
+
+    return false;
+}
+
+bool lexer_t::is_terminal(const string& terminal)
+{
+    map<string, token_type>::iterator it = terminals.find(terminal);
+    if(it != terminals.end())
+    {
+        return true;
+    }
+    return false;
+}
+
+bool lexer_t::check_number()
+{
+    string token;
+    while(true)
+    {
+        char current = buffer.peek();
+        if(isdigit(current))
+        {
+            token.push_back(current);
+        }
+        else if(token.empty())
+        {
+            return false;
         }
         else
         {
-            if(isdigit(current))
-            {
-                token.push_back(current);
-                buffer.next();
-                continue;
-            }
-            else
-            {
-                current_token.type = NUMBER;
-                current_token.value = token;
-                break;
-            }
+            current_token.type = NUMBER;
+            current_token.value = token;
+            return true;
         }
+        buffer.next();
+    }
+
+}
+
+bool lexer_t::check_eof()
+{
+    char current = buffer.peek();
+
+    if(current == 0)
+    {
+        current_token.value = "";
+        current_token.type = END_OF_FILE;
+        return true;
+    }
+
+    return false;
+}
+
+void lexer_t::flush_spaces()
+{
+    while(buffer.peek() == ' ')
+    {
+        buffer.next();
     }
 }

@@ -3,6 +3,7 @@
 
 #include <istream>
 #include <map>
+#include <string>
 #include "buffer.h"
 #include "token.h"
 
@@ -18,7 +19,14 @@ private:
     token_t current_token;
     buffer_t buffer;
 
-    std::map<char, token_type> terminals;
+    std::map<std::string, token_type> terminals;
+
+    bool check_several_symbols_terminal();
+    bool check_one_symbol_terminal();
+    bool check_number();
+    bool check_eof();
+    bool is_terminal(const std::string&);
+    void flush_spaces();
 };
 
 #endif /* end of include guard: LEXER_H */

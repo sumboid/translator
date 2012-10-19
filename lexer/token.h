@@ -6,6 +6,9 @@ enum token_type
     NUMBER,
     OPERATOR,
     BRACKET,     //not enought imagination
+    DELIMITER,
+    VARIABLE,
+    TYPE,
     END_OF_FILE
 };
 
