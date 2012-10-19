@@ -11,7 +11,6 @@ namespace syntaxtype
     const char* MUL = "mul";
     const char* DIV = "div";
     const char* POW = "pow";
-    const char* DIV = "div";
 }
 
 #endif /* end of include guard: SYNTAXTYPE_H */

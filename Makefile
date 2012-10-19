@@ -3,7 +3,9 @@ cxxflags := -O3
 objs     := main.o \
 			lexer/buffer.o \
 			lexer/lexer.o \
-			parser/parser.o
+			parser/parser.o \
+			parser/astree.o \
+			parser/syntaxunit.o
 bin      := t
 
 all: $(bin)

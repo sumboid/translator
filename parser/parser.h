@@ -13,18 +13,16 @@ public:
     parser_t (std::istream& stream);
     ~parser_t();
 
-    astree_t get_ast();
+    astree_t* get_ast();
 private:
-    void parse_expr();
-    void parse_fact();
-    void parse_pow();
-    void parse_number();
+    astree_t* parse_expr();
+    astree_t* parse_fact();
+    astree_t* parse_pow();
+    astree_t* parse_number();
     void parse();
 
-    std::vector<std::string> tree;
     lexer_t* lexer;
     astree_t* ast_root;
-    astree_t* ast_current;
     bool parsed;
 };
 #endif /* end of include guard: PARSER_H */

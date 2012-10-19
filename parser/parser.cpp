@@ -3,22 +3,24 @@
 #include <cmath>
 #include <cstdlib>
 #include "parser.h"
+#include "syntaxtype.h"
 #include "../lexer/token.h"
 
 parser_t::parser_t(std::istream& stream)
-    :lexer(new lexer_t(stream)), parsed(false),
-     ast_root(new astree_t(new syntaxunit_t("program"))),
-     ast_current(ast_root)
+    :lexer(new lexer_t(stream)), parsed(false)
 {}
 
 parser_t::~parser_t()
 {
     delete lexer;
+    delete ast_root;
 }
 
-Tree* parser_t::parse()
+void parser_t::parse()
 {
-    return parse_expr();
+    ast_root = new astree_t(syntaxunit_t("program"));
+    ast_root->add_child(parse_expr());
+    parsed = true;
 }
 
 bool check(token_t token, const std::string& cmp)
@@ -26,103 +28,106 @@ bool check(token_t token, const std::string& cmp)
     return 0 == token.value.compare(cmp);
 }
 
-astree_t get_ast()
+astree_t* parser_t::get_ast()
 {
     if(!parsed)
     {
         parse();
     }
 
-    return ast;
+    return ast_root;
 }
 
-void parser_t::parse_expr()
+astree_t* parser_t::parse_expr()
 {
-    parse_fact();
+    astree_t* left = parse_fact();
+    astree_t* local_root = left;
+    token_t token = lexer->peek();
 
-    while(true)
+    if(check(token, "+"))
     {
-        token_t token = lexer->peek();
-        if(check(token, "+"))
-        {
-            syntaxunit_t add_unit = new syntaxunit_t(ADD);
-            ast_current->add_child(add_unit);
-            ast_current = add_unit;
-            ast_current->swap();
-            lexer->next();
-            parse_fact();
-        }
-        else if(check(token, "-"))
-        {
-            syntaxunit_t sub_unit = new syntaxunit_t(SUB);
-            ast_current->add_child(sub_unit);
-            ast_current = sub_unit;
-            ast_current->swap();
-            lexer->next();
-            parse_fact();
-        }
-        else break;
+        syntaxunit_t add_unit(syntaxtype::ADD);
+        local_root = new astree_t(add_unit);
+    }
+    else if(check(token, "-"))
+    {
+        syntaxunit_t sub_unit(syntaxtype::SUB);
+        local_root = new astree_t(sub_unit);
+    }
+    else
+    {
+        return local_root;
     }
 
-    return result;
+    local_root->add_child(left);
+    lexer->next();
+    astree_t* right = parse_expr();
+    local_root->add_child(right);
+
+    return local_root;
 }
 
-void parser_t::parse_fact()
+astree_t* parser_t::parse_fact()
 {
-    int result = parse_pow();
+    astree_t* left = parse_pow();
+    astree_t* local_root = left;
+    token_t token = lexer->peek();
 
-    while(true)
+    if(check(token, "*"))
     {
-        token_t token = lexer->peek();
-
-        if(check(token, "*"))
-        {
-            syntaxunit_t mul_unit = new syntaxunit_t(MUL);
-            ast_current->add_child(mul_unit);
-            ast_current = mul_unit;
-            ast_current->swap();
-            lexer->next();
-            parse_pow();
-        }
-        else if(check(token, "/"))
-        {
-            syntaxunit_t div_unit = new syntaxunit_t(DIV);
-            ast_current->add_child(div_unit);
-            ast_current = div_unit;
-            ast_current->swap();
-            lexer->next();
-            parse_pow();
-        }
-        else break;
+        syntaxunit_t mul_unit(syntaxtype::MUL);
+        local_root = new astree_t(mul_unit);
     }
-    return result;
+    else if(check(token, "/"))
+    {
+        syntaxunit_t div_unit(syntaxtype::DIV);
+        local_root = new astree_t(div_unit);
+    }
+    else
+    {
+        return local_root;
+    }
+
+    local_root->add_child(left);
+    lexer->next();
+    astree_t* right = parse_fact();
+    local_root->add_child(right);
+
+    return local_root;
 }
 
-void parser_t::parse_pow()
+astree_t* parser_t::parse_pow()
 {
-    int result = parse_number();
+    astree_t* right = parse_number();
+    astree_t* local_root = right;
     token_t token = lexer->peek();
 
     if(check(token, "^"))
     {
+        syntaxunit_t pow_unit(syntaxtype::POW);
+        local_root = new astree_t(pow_unit);
         lexer->next();
-        result = pow(result, parse_pow());
+        astree_t* left = parse_pow();
+        local_root->add_child(left);
+        local_root->add_child(right);
     }
-    return result;
+    return local_root;
 }
 
-void parser_t::parse_number()
+astree_t* parser_t::parse_number()
 {
     token_t token = lexer->peek();
+    astree_t* local_root;
     if(token.type == NUMBER)
     {
         lexer->next();
-        ast_current->add_child(new syntaxunit_t(NUMBER, token.value));
+        syntaxunit_t const_unit(syntaxtype::CONST, token.value);
+        local_root = new astree_t(const_unit);
     }
     else if(token.type == BRACKET && check(token, "("))
     {
         lexer->next();
-        parse_expr();
+        local_root = parse_expr();
         token = lexer->peek();
         if(token.type == BRACKET && check(token, ")"))
         {
@@ -137,6 +142,6 @@ void parser_t::parse_number()
     {
         throw -1;
     }
-}
 
-void add_
+    return local_root;
+}
