@@ -8,6 +8,7 @@ enum token_type
     BRACKET,     //not enought imagination
     DELIMITER,
     VARIABLE,
+    ASSIGN,
     TYPE,
     END_OF_FILE
 };

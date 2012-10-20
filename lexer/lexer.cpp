@@ -22,6 +22,8 @@ using std::map;
 
     terminals["int"] = TYPE;
     terminals["double"] = TYPE;
+
+    terminals["="] = ASSIGN;
     next(); //get first token
 }
 
@@ -72,6 +74,7 @@ bool lexer_t::check_several_symbols_terminal()
             map<string, token_type>::iterator it = terminals.find(token);
             current_token.type = it->second;
             current_token.value = it->first;
+            buffer.next();
             return true;
         }
 
@@ -147,7 +150,7 @@ bool lexer_t::check_eof()
 
 void lexer_t::flush_spaces()
 {
-    while(buffer.peek() == ' ')
+    while(buffer.peek() == ' ' || buffer.peek() == '\n')
     {
         buffer.next();
     }

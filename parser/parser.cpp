@@ -6,6 +6,8 @@
 #include "syntaxtype.h"
 #include "../lexer/token.h"
 
+using std::string;
+
     parser_t::parser_t(std::istream& stream)
 :lexer(new lexer_t(stream)), parsed(false)
 {}
@@ -19,7 +21,53 @@ parser_t::~parser_t()
 void parser_t::parse()
 {
     ast_root = new astree_t(syntaxunit_t("program"));
-    ast_root->add_child(parse_expr());
+
+    //XXX: parse function
+    while(lexer->peek().type != END_OF_FILE)
+    {
+        astree_t* local_root;
+        if(lexer->peek().type == TYPE)
+        {
+            string type_of_variable = lexer->peek().value;
+            syntaxunit_t decl_unit(syntaxtype::DECL, type_of_variable);
+            local_root = new astree_t(decl_unit);
+            lexer->next();
+            if(lexer->peek().type == VARIABLE)
+            {
+                string name_of_variable = lexer->peek().value;
+                syntaxunit_t var_unit(syntaxtype::VAR, name_of_variable);
+                local_root->add_child(new astree_t(var_unit));
+                ast_root->add_child(local_root);
+                lexer->next();
+                if(lexer->peek().type == DELIMITER)
+                {
+                    lexer->next();
+                    continue;
+                }
+                else if(lexer->peek().type == ASSIGN)
+                {
+                    syntaxunit_t assign_unit(syntaxtype::ASSIGN);
+                    astree_t* assign_root = new astree_t(assign_unit);
+                    assign_root->add_child(new astree_t(var_unit));
+                    lexer->next();
+                    assign_root->add_child(parse_expr());
+                    if(lexer->peek().type == DELIMITER)
+                    {
+                        ast_root->add_child(assign_root);
+                        lexer->next();
+                        continue;
+                    }
+                }
+            }
+            throw  -1;
+        }
+        else if(lexer->peek().type == VARIABLE)
+        {
+        }
+        else
+        {
+        }
+    }
     parsed = true;
 }
 
@@ -122,7 +170,7 @@ astree_t* parser_t::parse_pow()
     return local_root;
 }
 
-astree_t* parser_t::parse_number()
+astree_t* parser_t::parse_number() //XXX: RENAME!
 {
     token_t token = lexer->peek();
     astree_t* local_root;
@@ -131,6 +179,12 @@ astree_t* parser_t::parse_number()
         lexer->next();
         syntaxunit_t const_unit(syntaxtype::CONST, token.value);
         local_root = new astree_t(const_unit);
+    }
+    else if(token.type == VARIABLE)
+    {
+        lexer->next();
+        syntaxunit_t var_unit(syntaxtype::VAR, token.value);
+        local_root = new astree_t(var_unit);
     }
     else if(token.type == BRACKET && check(token, "("))
     {
