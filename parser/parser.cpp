@@ -46,6 +46,7 @@ astree_t* parser_t::parse_expr()
 
     if(check(token, "+"))
     {
+        std::cout << "+" << std::endl;
         syntaxunit_t add_unit(syntaxtype::ADD);
         local_root = new astree_t(add_unit);
     }

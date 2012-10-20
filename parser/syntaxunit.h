@@ -11,6 +11,7 @@ public:
                   const std::string& value);
 
     std::string& get_value();
+    std::string& get_name();
     bool has_value();
 private:
     std::string unit_name;

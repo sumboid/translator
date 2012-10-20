@@ -30,6 +30,10 @@ std::string& syntaxunit_t::get_value()
         throw logic_error(NO_VALUE_ERROR);
     }
 }
+std::string& syntaxunit_t::get_name()
+{
+    return unit_name;
+}
 
 bool syntaxunit_t::has_value()
 {

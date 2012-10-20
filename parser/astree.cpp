@@ -1,3 +1,4 @@
+#include <iostream>
 #include <exception>
 #include <stdexcept>
 #include "astree.h"
@@ -24,7 +25,7 @@ astree_t::~astree_t()
 
 vector<astree_t*> astree_t::get_childs()
 {
-    if(!is_leaf())
+    if(is_leaf())
     {
         throw logic_error(NO_CHILD_ERROR);
     }
@@ -44,5 +45,5 @@ syntaxunit_t astree_t::get_unit()
 
 bool astree_t::is_leaf()
 {
-    return !childs.empty();
+    return childs.size() == 0;
 }
