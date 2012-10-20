@@ -193,6 +193,29 @@ astree_t* parser_t::parse_func_body()
             }
             throw -1;
         }
+        else if(lexer->peek().type == RETURN)
+        {
+            syntaxunit_t return_unit(syntaxtype::RETURN);
+            astree_t* return_root = new astree_t(return_unit);
+            body_root->add_child(return_root);
+            lexer->next();
+            if(lexer->peek().type != DELIMITER)
+            {
+                return_root->add_child(parse_expr());
+                if(lexer->peek().type != DELIMITER)
+                {
+                    throw -1;
+                }
+            }
+
+            lexer->next();
+            continue;
+        }
+        else if(lexer->peek().type == DELIMITER)
+        {
+            lexer->next();
+            continue;
+        }
         else
         {
             throw -1;

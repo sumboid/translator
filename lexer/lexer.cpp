@@ -28,6 +28,8 @@ using std::map;
 
     terminals["="] = ASSIGN;
     terminals[","] = COMMA;
+
+    terminals["return"] = RETURN;
     next(); //get first token
 }
 

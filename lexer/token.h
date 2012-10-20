@@ -11,6 +11,7 @@ enum token_type
     ASSIGN,
     TYPE,
     COMMA,
+    RETURN,
     END_OF_FILE
 };
 

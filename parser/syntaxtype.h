@@ -18,6 +18,7 @@ namespace syntaxtype
     const char* FUNC_ARGS = "arg-list";
     const char* FUNC_BODY = "body";
     const char* FUNCALL = "funcall";
+    const char* RETURN = "return";
 }
 
 #endif /* end of include guard: SYNTAXTYPE_H */
