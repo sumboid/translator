@@ -17,13 +17,17 @@ using std::map;
 
     terminals["("] = BRACKET;
     terminals[")"] = BRACKET;
+    terminals["{"] = BRACKET;
+    terminals["}"] = BRACKET;
 
     terminals[";"] = DELIMITER;
 
+    terminals["void"] = TYPE;
     terminals["int"] = TYPE;
     terminals["double"] = TYPE;
 
     terminals["="] = ASSIGN;
+    terminals[","] = COMMA;
     next(); //get first token
 }
 

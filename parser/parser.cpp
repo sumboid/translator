@@ -6,6 +6,15 @@
 #include "syntaxtype.h"
 #include "../lexer/token.h"
 
+namespace
+{
+
+    bool check(token_t token, const std::string& cmp)
+    {
+        return 0 == token.value.compare(cmp);
+    }
+
+}
 using std::string;
 
     parser_t::parser_t(std::istream& stream)
@@ -21,9 +30,105 @@ parser_t::~parser_t()
 void parser_t::parse()
 {
     ast_root = new astree_t(syntaxunit_t("program"));
-
-    //XXX: parse function
     while(lexer->peek().type != END_OF_FILE)
+    {
+        ast_root->add_child(parse_func());
+    }
+
+    parsed = true;
+}
+
+astree_t* parser_t::parse_func()
+{
+    if(lexer->peek().type != TYPE)
+    {
+        throw -1;
+    }
+
+    string type = lexer->peek().value;
+    astree_t* decl_func_root = new astree_t(syntaxunit_t(syntaxtype::DECL, type));
+
+    lexer->next();
+
+    if(lexer->peek().type != VARIABLE)
+    {
+        throw -1;
+    }
+
+    string name = lexer->peek().value;
+    astree_t* decl_func = new astree_t(syntaxunit_t(syntaxtype::FUNC, name));
+
+    lexer->next();
+
+    decl_func_root->add_child(decl_func);
+
+    decl_func->add_child(parse_func_args());
+    decl_func->add_child(parse_func_body());
+
+    return decl_func_root;
+}
+
+astree_t* parser_t::parse_func_args()
+{
+    if(!check(lexer->peek(), "("))
+    {
+        throw -1;
+    }
+    lexer->next();
+
+    astree_t* args_root = new astree_t(syntaxunit_t(syntaxtype::FUNC_ARGS));
+    bool kill = false;
+
+    while(!check(lexer->peek(), ")"))
+    {
+        if(kill) //XXX: :<
+        {
+            throw -1;
+        }
+
+        if(lexer->peek().type != TYPE)
+        {
+            throw -1;
+        }
+        astree_t* decl = new astree_t(syntaxunit_t(syntaxtype::DECL,
+                    lexer->peek().value));
+
+        lexer->next();
+
+        if(lexer->peek().type != VARIABLE)
+        {
+            throw -1;
+        }
+        astree_t* var = new astree_t(syntaxunit_t(syntaxtype::VAR,
+                    lexer->peek().value));
+        decl->add_child(var);
+        args_root->add_child(decl);
+        lexer->next();
+
+        if(lexer->peek().type != COMMA)
+        {
+            kill = true;
+        }
+        else
+        {
+            lexer->next();
+        }
+    }
+
+    lexer->next();
+    return args_root;
+}
+
+astree_t* parser_t::parse_func_body()
+{
+    if(!check(lexer->peek(), "{"))
+    {
+        throw -1;
+    }
+
+    lexer->next();
+    astree_t* body_root = new astree_t(syntaxunit_t(syntaxtype::FUNC_BODY));
+    while(!check(lexer->peek(), "}"))
     {
         astree_t* local_root;
         if(lexer->peek().type == TYPE)
@@ -37,7 +142,7 @@ void parser_t::parse()
                 string name_of_variable = lexer->peek().value;
                 syntaxunit_t var_unit(syntaxtype::VAR, name_of_variable);
                 local_root->add_child(new astree_t(var_unit));
-                ast_root->add_child(local_root);
+                body_root->add_child(local_root);
                 lexer->next();
                 if(lexer->peek().type == DELIMITER)
                 {
@@ -53,7 +158,7 @@ void parser_t::parse()
                     assign_root->add_child(parse_expr());
                     if(lexer->peek().type == DELIMITER)
                     {
-                        ast_root->add_child(assign_root);
+                        body_root->add_child(assign_root);
                         lexer->next();
                         continue;
                     }
@@ -81,7 +186,7 @@ void parser_t::parse()
                 assign_root->add_child(parse_expr());
                 if(lexer->peek().type == DELIMITER)
                 {
-                    ast_root->add_child(assign_root);
+                    body_root->add_child(assign_root);
                     lexer->next();
                     continue;
                 }
@@ -93,12 +198,9 @@ void parser_t::parse()
             throw -1;
         }
     }
-    parsed = true;
-}
 
-bool check(token_t token, const std::string& cmp)
-{
-    return 0 == token.value.compare(cmp);
+    lexer->next();
+    return body_root;
 }
 
 astree_t* parser_t::get_ast()

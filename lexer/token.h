@@ -10,6 +10,7 @@ enum token_type
     VARIABLE,
     ASSIGN,
     TYPE,
+    COMMA,
     END_OF_FILE
 };
 

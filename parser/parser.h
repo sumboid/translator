@@ -15,6 +15,9 @@ public:
 
     astree_t* get_ast();
 private:
+    astree_t* parse_func();
+    astree_t* parse_func_args();
+    astree_t* parse_func_body();
     astree_t* parse_expr();
     astree_t* parse_fact();
     astree_t* parse_pow();

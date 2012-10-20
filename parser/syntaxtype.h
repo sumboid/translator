@@ -14,6 +14,9 @@ namespace syntaxtype
     const char* ASSIGN = "assign";
     const char* CONST = "const";
     const char* VAR = "var";
+    const char* FUNC = "func";
+    const char* FUNC_ARGS = "arg-list";
+    const char* FUNC_BODY = "body";
 }
 
 #endif /* end of include guard: SYNTAXTYPE_H */
