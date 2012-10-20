@@ -30,6 +30,7 @@ using std::map;
     terminals[","] = COMMA;
 
     terminals["return"] = RETURN;
+
     next(); //get first token
 }
 
