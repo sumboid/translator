@@ -22,6 +22,7 @@ private:
     astree_t* parse_fact();
     astree_t* parse_pow();
     astree_t* parse_number();
+    astree_t* parse_funcall();
     void parse();
 
     lexer_t* lexer;

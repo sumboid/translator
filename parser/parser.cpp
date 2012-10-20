@@ -310,8 +310,17 @@ astree_t* parser_t::parse_number() //XXX: RENAME!
     else if(token.type == VARIABLE)
     {
         lexer->next();
-        syntaxunit_t var_unit(syntaxtype::VAR, token.value);
-        local_root = new astree_t(var_unit);
+        if(check(lexer->peek(), "("))
+        {
+            syntaxunit_t funcall_unit(syntaxtype::FUNCALL, token.value);
+            local_root = new astree_t(funcall_unit);
+            local_root->add_child(parse_funcall());
+        }
+        else
+        {
+            syntaxunit_t var_unit(syntaxtype::VAR, token.value);
+            local_root = new astree_t(var_unit);
+        }
     }
     else if(token.type == BRACKET && check(token, "("))
     {
@@ -333,4 +342,38 @@ astree_t* parser_t::parse_number() //XXX: RENAME!
     }
 
     return local_root;
+}
+
+astree_t* parser_t::parse_funcall()
+{
+    if(!check(lexer->peek(), "("))
+    {
+        throw -1;
+    }
+    lexer->next();
+
+    astree_t* args_root = new astree_t(syntaxunit_t(syntaxtype::FUNC_ARGS));
+    bool kill = false;
+
+    while(!check(lexer->peek(), ")"))
+    {
+        if(kill) //XXX: :<
+        {
+            throw -1;
+        }
+
+        args_root->add_child(parse_expr());
+
+        if(lexer->peek().type != COMMA)
+        {
+            kill = true;
+        }
+        else
+        {
+            lexer->next();
+        }
+    }
+
+    lexer->next();
+    return args_root;
 }
