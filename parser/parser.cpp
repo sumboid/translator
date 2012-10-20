@@ -63,9 +63,34 @@ void parser_t::parse()
         }
         else if(lexer->peek().type == VARIABLE)
         {
+            string name_of_variable = lexer->peek().value;
+            syntaxunit_t var_unit(syntaxtype::VAR, name_of_variable);
+            lexer->next();
+            if(lexer->peek().type == DELIMITER)
+            {
+                ast_root->add_child(new astree_t(var_unit));
+                lexer->next();
+                continue;
+            }
+            else if(lexer->peek().type == ASSIGN)
+            {
+                syntaxunit_t assign_unit(syntaxtype::ASSIGN);
+                astree_t* assign_root = new astree_t(assign_unit);
+                assign_root->add_child(new astree_t(var_unit));
+                lexer->next();
+                assign_root->add_child(parse_expr());
+                if(lexer->peek().type == DELIMITER)
+                {
+                    ast_root->add_child(assign_root);
+                    lexer->next();
+                    continue;
+                }
+            }
+            throw -1;
         }
         else
         {
+            throw -1;
         }
     }
     parsed = true;
