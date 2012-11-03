@@ -46,6 +46,7 @@ void lexer_t::next()
                         check_number()                   ||
                         check_one_symbol_terminal()      ||
                         check_several_symbols_terminal() ;
+    //std::cout << '[' << current_token.value << ']' << std::endl;
     if(!token_finded)
     {
         throw 1;
@@ -145,7 +146,7 @@ bool lexer_t::check_eof()
 {
     char current = buffer.peek();
 
-    if(current == 0)
+    if(current == -1)
     {
         current_token.value = "";
         current_token.type = END_OF_FILE;
@@ -157,8 +158,10 @@ bool lexer_t::check_eof()
 
 void lexer_t::flush_spaces()
 {
-    while(buffer.peek() == ' ' || buffer.peek() == '\n')
+    //std::cout << (void*)buffer.peek() << '?' << std::endl;
+    while(buffer.peek() == '\n' || buffer.peek() == '\r' || buffer.peek() == '\t' || buffer.peek() == ' ')
     {
+      //  std::cout << "flush: " << (void*)buffer.peek() << std::endl;
         buffer.next();
     }
 }
