@@ -224,6 +224,41 @@ astree_t* parser_t::parse_func_body()
     return body_root;
 }
 
+
+astree_t* parse_decl()
+{
+    astree_t* decl_root = parse_type();
+    decl_root->add_child(parse_name());
+
+    return decl_root;
+}
+
+astree_t* parse_type()
+{
+    token_t token = lexer->peek();
+    if(token.type != TYPE)
+    {
+        throw logic_error(TYPE_EXPECTED_ERROR + ": \'" + token.value + "\'");
+    }
+
+    astree_t* decl = new astree_t(new syntaxunit_t(syntaxtype::DECL, token.value));
+    return decl;
+}
+
+astree_t* parse_name()
+{
+    lexer->next();
+    token_t token = lexer->peek();
+    if(token.type != VARIABLE)
+    {
+        throw logic_error(VARIABLE_EXPECTED_ERROR + ": \'" + token.value + "\'");
+    }
+
+    astree_t* var = new astree_t(new syntaxunit_t(syntaxtype::VAR, token.value));
+
+    return var;
+}
+
 astree_t* parser_t::get_ast()
 {
     if(!parsed)
