@@ -50,6 +50,7 @@ void lexer_t::next()
     {
         throw 1;
     }
+    std::cout << "token: " << current_token.value << std::endl;
 }
 
 bool lexer_t::check_several_symbols_terminal()
@@ -61,7 +62,7 @@ bool lexer_t::check_several_symbols_terminal()
         char current = buffer.peek();
         string current_str;
         current_str.push_back(current);
-        if(current == 0 || current == ' ' || is_terminal(current_str))
+        if(current == 0 || current == ' ' || current == '\n' || current == '\t' || is_terminal(current_str))
         {
             if(token.empty())
             {
@@ -157,7 +158,7 @@ bool lexer_t::check_eof()
 
 void lexer_t::flush_spaces()
 {
-    while(buffer.peek() == ' ' || buffer.peek() == '\n')
+    while(buffer.peek() == ' ' || buffer.peek() == '\n' || buffer.peek() == '\t')
     {
         buffer.next();
     }
