@@ -126,97 +126,13 @@ astree_t* parser_t::parse_func_body()
 
     lexer->next();
     astree_t* body_root = new astree_t(syntaxunit_t(syntaxtype::FUNC_BODY));
+
     while(!check(lexer->peek(), "}"))
     {
-        astree_t* local_root;
-        if(lexer->peek().type == TYPE)
+        astree_t* child;
+        if(child = parse_decl() != 0)
         {
-            string type_of_variable = lexer->peek().value;
-            syntaxunit_t decl_unit(syntaxtype::DECL, type_of_variable);
-            local_root = new astree_t(decl_unit);
-            lexer->next();
-            if(lexer->peek().type == VARIABLE)
-            {
-                string name_of_variable = lexer->peek().value;
-                syntaxunit_t var_unit(syntaxtype::VAR, name_of_variable);
-                local_root->add_child(new astree_t(var_unit));
-                body_root->add_child(local_root);
-                lexer->next();
-                if(lexer->peek().type == DELIMITER)
-                {
-                    lexer->next();
-                    continue;
-                }
-                else if(lexer->peek().type == ASSIGN)
-                {
-                    syntaxunit_t assign_unit(syntaxtype::ASSIGN);
-                    astree_t* assign_root = new astree_t(assign_unit);
-                    assign_root->add_child(new astree_t(var_unit));
-                    lexer->next();
-                    assign_root->add_child(parse_expr());
-                    if(lexer->peek().type == DELIMITER)
-                    {
-                        body_root->add_child(assign_root);
-                        lexer->next();
-                        continue;
-                    }
-                }
-            }
-            throw  -1;
-        }
-        else if(lexer->peek().type == VARIABLE)
-        {
-            string name_of_variable = lexer->peek().value;
-            syntaxunit_t var_unit(syntaxtype::VAR, name_of_variable);
-            lexer->next();
-            if(lexer->peek().type == DELIMITER)
-            {
-                ast_root->add_child(new astree_t(var_unit));
-                lexer->next();
-                continue;
-            }
-            else if(lexer->peek().type == ASSIGN)
-            {
-                syntaxunit_t assign_unit(syntaxtype::ASSIGN);
-                astree_t* assign_root = new astree_t(assign_unit);
-                assign_root->add_child(new astree_t(var_unit));
-                lexer->next();
-                assign_root->add_child(parse_expr());
-                if(lexer->peek().type == DELIMITER)
-                {
-                    body_root->add_child(assign_root);
-                    lexer->next();
-                    continue;
-                }
-            }
-            throw -1;
-        }
-        else if(lexer->peek().type == RETURN)
-        {
-            syntaxunit_t return_unit(syntaxtype::RETURN);
-            astree_t* return_root = new astree_t(return_unit);
-            body_root->add_child(return_root);
-            lexer->next();
-            if(lexer->peek().type != DELIMITER)
-            {
-                return_root->add_child(parse_expr());
-                if(lexer->peek().type != DELIMITER)
-                {
-                    throw -1;
-                }
-            }
 
-            lexer->next();
-            continue;
-        }
-        else if(lexer->peek().type == DELIMITER)
-        {
-            lexer->next();
-            continue;
-        }
-        else
-        {
-            throw -1;
         }
     }
 
@@ -224,10 +140,76 @@ astree_t* parser_t::parse_func_body()
     return body_root;
 }
 
+astree_t* parse_return()
+{
+    token_t return_token = lexer->peek();
+    if(return_token.type != RETURN)
+    {
+        return 0;
+    }
+    lexer->next();
+
+    astree_t* return_root = new astree_t(new syntaxunit_t(syntaxtype::RETURN));
+    if(lexer->peek().type == DELIMITER)
+    {
+        return return_root;
+    }
+
+    return_root->add_child(parse_expr);
+    return return_root;
+}
+
+bool check_delimiter()
+{
+    if(lexer->peek().type == DELIMITER)
+    {
+        return 
+
+astree_t* parse_assign()
+{
+    astree_t* var;
+
+    try
+    {
+        var = parse_name();
+    }
+    catch(const logic_error& error)
+    {
+        return 0;
+    }
+
+    return parse_assign(var);
+}
+
+astree_t* parse_assign(astree_t* var)
+{
+    token_t assign = lexer->peek();
+    if(assign.type != ASSIGN)
+    {
+        throw logic_error(ASSIGN_EXPECTED_ERROR + ": \'" + assign.value + "\'");
+    }
+
+    lexer->next();
+
+    astree_t* assign = new astree_t(new syntaxunit_t(syntaxtype::ASSIGN));
+    assign->add_child(var);
+    assign->add_child(parse_expr());
+
+    return assign;
+}
 
 astree_t* parse_decl()
 {
-    astree_t* decl_root = parse_type();
+    astree_t* decl_root;
+    try
+    {
+        decl_root = parse_type();
+    }
+    catch(const logic_error& error)
+    {
+        return 0;
+    }
+
     decl_root->add_child(parse_name());
 
     return decl_root;
@@ -242,6 +224,7 @@ astree_t* parse_type()
     }
 
     astree_t* decl = new astree_t(new syntaxunit_t(syntaxtype::DECL, token.value));
+    lexer->next();
     return decl;
 }
 
@@ -255,7 +238,7 @@ astree_t* parse_name()
     }
 
     astree_t* var = new astree_t(new syntaxunit_t(syntaxtype::VAR, token.value));
-
+    lexer->next();
     return var;
 }
 
