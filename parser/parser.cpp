@@ -121,7 +121,7 @@ astree_t* parser_t::parse_func_body()
 {
     if(!check(lexer->peek(), "{"))
     {
-        throw -1;
+        throw logic_error(BRACKET_EXPECTED_ERROR);
     }
 
     lexer->next();
@@ -132,8 +132,26 @@ astree_t* parser_t::parse_func_body()
         astree_t* child;
         if(child = parse_decl() != 0)
         {
-
+            body_root->add_child(child);
+            if(!check_delimiter())
+            {
+                child = parse_assign(child.get_childs()[0]);
+                body_root->add_child(child);
+            }
         }
+        else if(child = parse_assign() != 0)
+        {
+            body_root->add_child(child);
+        }
+        else if(child = parse_return() != 0)
+        {
+            body_root->add_child(child);
+        }
+        else
+        {
+            throw logic_error(WTF_ERROR);
+        }
+        lexer->next(); //Drop delimiter
     }
 
     lexer->next();
@@ -163,7 +181,10 @@ bool check_delimiter()
 {
     if(lexer->peek().type == DELIMITER)
     {
-        return 
+        return true;
+    }
+    return false;
+}
 
 astree_t* parse_assign()
 {
@@ -194,7 +215,7 @@ astree_t* parse_assign(astree_t* var)
     astree_t* assign = new astree_t(new syntaxunit_t(syntaxtype::ASSIGN));
     assign->add_child(var);
     assign->add_child(parse_expr());
-
+    lexer->next();
     return assign;
 }
 
