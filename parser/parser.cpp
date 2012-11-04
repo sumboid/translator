@@ -8,12 +8,10 @@
 
 namespace
 {
-
     bool check(token_t token, const std::string& cmp)
     {
         return 0 == token.value.compare(cmp);
     }
-
 }
 using std::string;
 

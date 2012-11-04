@@ -1,5 +1,5 @@
 #include "buffer.h"
-
+#include <iostream>
 
 using std::istream;
 
@@ -19,7 +19,7 @@ bool buffer_t::fill_buffer()
 {
     if(!stream.eof())
     {
-        stream.get(buffer, buffer_size);
+        stream.read(buffer, buffer_size);
         real_buffer_size = stream.gcount();
         current_buffer_position = 0;
         return true;
@@ -45,7 +45,7 @@ char buffer_t::peek()
     {
         if(false == fill_buffer()) //need exception
         {
-            return 0; //XXX
+            return -1; //XXX
         }
     }
 
