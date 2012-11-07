@@ -31,6 +31,7 @@ int main(int argc, const char *argv[])
 {
     parser_t parser(std::cin);
     astree_t* ast = parser.get_ast();
+
     print(ast);
     return 0;
 }

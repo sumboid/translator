@@ -110,7 +110,7 @@ astree_t* parser_t::parse_func_body()
             {
                 std::cout << "Delimiter wasn't found" << std::endl;
                 std::cout << "Try to find assign" << std::endl;
-                child = parse_assign(child->get_childs()[0]);
+                child = parse_assign(new astree_t(*child->get_childs()[0])); //XXX: LEGSHOT
                 body_root->add_child(child);
             }
         }
@@ -192,7 +192,6 @@ astree_t* parser_t::parse_assign(astree_t* var)
     astree_t* assign_root = new astree_t(syntaxunit_t(syntaxtype::ASSIGN));
     assign_root->add_child(var);
     assign_root->add_child(parse_expr());
-    lexer->next();
     return assign_root;
 }
 
