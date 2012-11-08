@@ -1,5 +1,5 @@
 cxx      := g++
-cxxflags := -O3
+cxxflags := -O3 -g
 objs     := main.o \
 			lexer/buffer.o \
 			lexer/lexer.o \

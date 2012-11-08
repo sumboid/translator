@@ -1,6 +1,6 @@
 double f(int a, double c)
 {
-    int b = 4;
+    b = 4;
     return a ^ (c * 2 - 4 * (32 - b));
 }
 

@@ -1,13 +1,26 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <string>
 #include <cstdlib>
+#include <exception>
+#include <stdexcept>
 #include "parser.h"
 #include "syntaxtype.h"
 #include "../lexer/token.h"
 
+using std::logic_error;
+using std::string;
 namespace
 {
+    const string BRACKET_EXPECTED_ERROR =  "Bracket was expected";
+    const string COMMA_EXPECTED_ERROR = "Comma was expected";
+    const string WTF_ERROR = "What da fuck";
+    const string ASSIGN_EXPECTED_ERROR = "Assign was expected";
+    const string TYPE_EXPECTED_ERROR = "Name of type was expected";
+    const string VARIABLE_EXPECTED_ERROR = "Name of variable was expected";
+
+
     bool check(token_t token, const std::string& cmp)
     {
         return 0 == token.value.compare(cmp);
@@ -38,30 +51,9 @@ void parser_t::parse()
 
 astree_t* parser_t::parse_func()
 {
-    if(lexer->peek().type != TYPE)
-    {
-        throw -1;
-    }
-
-    string type = lexer->peek().value;
-    astree_t* decl_func_root = new astree_t(syntaxunit_t(syntaxtype::DECL, type));
-
-    lexer->next();
-
-    if(lexer->peek().type != VARIABLE)
-    {
-        throw -1;
-    }
-
-    string name = lexer->peek().value;
-    astree_t* decl_func = new astree_t(syntaxunit_t(syntaxtype::FUNC, name));
-
-    lexer->next();
-
-    decl_func_root->add_child(decl_func);
-
-    decl_func->add_child(parse_func_args());
-    decl_func->add_child(parse_func_body());
+    astree_t* decl_func_root = parse_decl();
+    decl_func_root->add_child(parse_func_args());
+    decl_func_root->add_child(parse_func_body());
 
     return decl_func_root;
 }
@@ -70,47 +62,27 @@ astree_t* parser_t::parse_func_args()
 {
     if(!check(lexer->peek(), "("))
     {
-        throw -1;
+        throw logic_error(BRACKET_EXPECTED_ERROR);
     }
     lexer->next();
 
     astree_t* args_root = new astree_t(syntaxunit_t(syntaxtype::FUNC_ARGS));
     bool kill = false;
 
-    while(!check(lexer->peek(), ")"))
+    while(true)
     {
-        if(kill) //XXX: :<
+        astree_t* child = parse_decl();
+        args_root->add_child(child);
+
+        if(check(lexer->peek(), ")"))
         {
-            throw -1;
+            break;
         }
-
-        if(lexer->peek().type != TYPE)
-        {
-            throw -1;
-        }
-        astree_t* decl = new astree_t(syntaxunit_t(syntaxtype::DECL,
-                    lexer->peek().value));
-
-        lexer->next();
-
-        if(lexer->peek().type != VARIABLE)
-        {
-            throw -1;
-        }
-        astree_t* var = new astree_t(syntaxunit_t(syntaxtype::VAR,
-                    lexer->peek().value));
-        decl->add_child(var);
-        args_root->add_child(decl);
-        lexer->next();
-
         if(lexer->peek().type != COMMA)
         {
-            kill = true;
+            throw logic_error(COMMA_EXPECTED_ERROR);
         }
-        else
-        {
-            lexer->next();
-        }
+        lexer->next();
     }
 
     lexer->next();
@@ -130,21 +102,26 @@ astree_t* parser_t::parse_func_body()
     while(!check(lexer->peek(), "}"))
     {
         astree_t* child;
-        if(child = parse_decl() != 0)
+        if((child = parse_decl()) != 0)
         {
+            std::cout << "Declaration was found" << std::endl;
             body_root->add_child(child);
             if(!check_delimiter())
             {
-                child = parse_assign(child.get_childs()[0]);
+                std::cout << "Delimiter wasn't found" << std::endl;
+                std::cout << "Try to find assign" << std::endl;
+                child = parse_assign(child->get_childs()[0]);
                 body_root->add_child(child);
             }
         }
-        else if(child = parse_assign() != 0)
+        else if((child = parse_assign()) != 0)
         {
+            std::cout << "Assign was found" << std::endl;
             body_root->add_child(child);
         }
-        else if(child = parse_return() != 0)
+        else if((child = parse_return()) != 0)
         {
+            std::cout << "Return was found" << std::endl;
             body_root->add_child(child);
         }
         else
@@ -158,7 +135,7 @@ astree_t* parser_t::parse_func_body()
     return body_root;
 }
 
-astree_t* parse_return()
+astree_t* parser_t::parse_return()
 {
     token_t return_token = lexer->peek();
     if(return_token.type != RETURN)
@@ -167,17 +144,17 @@ astree_t* parse_return()
     }
     lexer->next();
 
-    astree_t* return_root = new astree_t(new syntaxunit_t(syntaxtype::RETURN));
+    astree_t* return_root = new astree_t(syntaxunit_t(syntaxtype::RETURN));
     if(lexer->peek().type == DELIMITER)
     {
         return return_root;
     }
 
-    return_root->add_child(parse_expr);
+    return_root->add_child(parse_expr());
     return return_root;
 }
 
-bool check_delimiter()
+bool parser_t::check_delimiter()
 {
     if(lexer->peek().type == DELIMITER)
     {
@@ -186,7 +163,7 @@ bool check_delimiter()
     return false;
 }
 
-astree_t* parse_assign()
+astree_t* parser_t::parse_assign()
 {
     astree_t* var;
 
@@ -202,7 +179,7 @@ astree_t* parse_assign()
     return parse_assign(var);
 }
 
-astree_t* parse_assign(astree_t* var)
+astree_t* parser_t::parse_assign(astree_t* var)
 {
     token_t assign = lexer->peek();
     if(assign.type != ASSIGN)
@@ -212,14 +189,14 @@ astree_t* parse_assign(astree_t* var)
 
     lexer->next();
 
-    astree_t* assign = new astree_t(new syntaxunit_t(syntaxtype::ASSIGN));
-    assign->add_child(var);
-    assign->add_child(parse_expr());
+    astree_t* assign_root = new astree_t(syntaxunit_t(syntaxtype::ASSIGN));
+    assign_root->add_child(var);
+    assign_root->add_child(parse_expr());
     lexer->next();
-    return assign;
+    return assign_root;
 }
 
-astree_t* parse_decl()
+astree_t* parser_t::parse_decl()
 {
     astree_t* decl_root;
     try
@@ -236,7 +213,7 @@ astree_t* parse_decl()
     return decl_root;
 }
 
-astree_t* parse_type()
+astree_t* parser_t::parse_type()
 {
     token_t token = lexer->peek();
     if(token.type != TYPE)
@@ -244,21 +221,20 @@ astree_t* parse_type()
         throw logic_error(TYPE_EXPECTED_ERROR + ": \'" + token.value + "\'");
     }
 
-    astree_t* decl = new astree_t(new syntaxunit_t(syntaxtype::DECL, token.value));
+    astree_t* decl = new astree_t(syntaxunit_t(syntaxtype::DECL, token.value));
     lexer->next();
     return decl;
 }
 
-astree_t* parse_name()
+astree_t* parser_t::parse_name()
 {
-    lexer->next();
     token_t token = lexer->peek();
     if(token.type != VARIABLE)
     {
         throw logic_error(VARIABLE_EXPECTED_ERROR + ": \'" + token.value + "\'");
     }
 
-    astree_t* var = new astree_t(new syntaxunit_t(syntaxtype::VAR, token.value));
+    astree_t* var = new astree_t(syntaxunit_t(syntaxtype::VAR, token.value));
     lexer->next();
     return var;
 }

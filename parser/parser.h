@@ -18,11 +18,20 @@ private:
     astree_t* parse_func();
     astree_t* parse_func_args();
     astree_t* parse_func_body();
+    astree_t* parse_return();
+    astree_t* parse_assign();
+    astree_t* parse_assign(astree_t* var);
+    astree_t* parse_decl();
+    astree_t* parse_type();
+    astree_t* parse_name();
     astree_t* parse_expr();
     astree_t* parse_fact();
     astree_t* parse_pow();
     astree_t* parse_number();
     astree_t* parse_funcall();
+
+    bool check_delimiter();
+
     void parse();
 
     lexer_t* lexer;
