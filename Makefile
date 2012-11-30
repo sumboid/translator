@@ -1,11 +1,12 @@
 cxx      := g++
-cxxflags := -O3 -g
+cxxflags := -Ofast -march=native -Wall
 objs     := main.o \
 			lexer/buffer.o \
 			lexer/lexer.o \
 			parser/parser.o \
 			parser/astree.o \
-			parser/syntaxunit.o
+			parser/syntaxunit.o \
+			translator/translator.o
 bin      := t
 
 all: $(bin)
