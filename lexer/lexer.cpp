@@ -46,12 +46,10 @@ void lexer_t::next()
                         check_number()                   ||
                         check_one_symbol_terminal()      ||
                         check_several_symbols_terminal() ;
-    //std::cout << '[' << current_token.value << ']' << std::endl;
     if(!token_finded)
     {
         throw 1;
     }
-    std::cout << "token: " << current_token.value << std::endl;
 }
 
 bool lexer_t::check_several_symbols_terminal()

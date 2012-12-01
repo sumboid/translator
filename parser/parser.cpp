@@ -71,13 +71,16 @@ astree_t* parser_t::parse_func_args()
 
     while(true)
     {
+
         astree_t* child = parse_decl();
-        args_root->add_child(child);
+        if(child != NULL)
+            args_root->add_child(child);
 
         if(check(lexer->peek(), ")"))
         {
             break;
         }
+
         if(lexer->peek().type != COMMA)
         {
             throw logic_error(COMMA_EXPECTED_ERROR);
@@ -104,24 +107,19 @@ astree_t* parser_t::parse_func_body()
         astree_t* child;
         if((child = parse_decl()) != 0)
         {
-            std::cout << "Declaration was found" << std::endl;
             body_root->add_child(child);
             if(!check_delimiter())
             {
-                std::cout << "Delimiter wasn't found" << std::endl;
-                std::cout << "Try to find assign" << std::endl;
                 child = parse_assign(new astree_t(*child->get_childs()[0])); //XXX: LEGSHOT
                 body_root->add_child(child);
             }
         }
         else if((child = parse_assign()) != 0)
         {
-            std::cout << "Assign was found" << std::endl;
             body_root->add_child(child);
         }
         else if((child = parse_return()) != 0)
         {
-            std::cout << "Return was found" << std::endl;
             body_root->add_child(child);
         }
         else

@@ -1,24 +1,23 @@
 #ifndef SYNTAXTYPE_H
 #define SYNTAXTYPE_H
 
-#include <string>
-
 namespace syntaxtype
 {
-    const char* DECL = "decl";
-    const char* ADD = "add";
-    const char* SUB = "sub";
-    const char* MUL = "mul";
-    const char* DIV = "div";
-    const char* POW = "pow";
-    const char* ASSIGN = "assign";
-    const char* CONST = "const";
-    const char* VAR = "var";
-    const char* FUNC = "func";
-    const char* FUNC_ARGS = "arg-list";
-    const char* FUNC_BODY = "body";
-    const char* FUNCALL = "funcall";
-    const char* RETURN = "return";
+    static const char* PROGRAM = "program";
+    static const char* DECL = "decl";
+    static const char* ADD = "add";
+    static const char* SUB = "sub";
+    static const char* MUL = "mul";
+    static const char* DIV = "div";
+    static const char* POW = "pow";
+    static const char* ASSIGN = "assign";
+    static const char* CONST = "const";
+    static const char* VAR = "var";
+    static const char* FUNC = "func";
+    static const char* FUNC_ARGS = "arg-list";
+    static const char* FUNC_BODY = "body";
+    static const char* FUNCALL = "funcall";
+    static const char* RETURN = "return";
 }
 
 #endif /* end of include guard: SYNTAXTYPE_H */
