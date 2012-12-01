@@ -13,6 +13,7 @@ struct function_state_t
     std::map<std::string, int> variables;
     int stack_offset;
     int current_offset;
+    int args_number;
 
     function_state_t()
     {
