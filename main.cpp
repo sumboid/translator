@@ -20,6 +20,7 @@ void print(astree_t* ast)
     }
     std::cout << ">";
     vector<astree_t*> childs = ast->get_childs();
+    std::cout.flush();
     for(int i = 0; i < childs.size(); i++)
     {
         print(childs[i]);
