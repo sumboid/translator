@@ -23,7 +23,7 @@ using std::vector;
 using std::string;
 
 translator_t::translator_t(ostream& _stream)
-    :stream(_stream), stack_offset(0), current_offset(0)
+    :stream(_stream)
 {}
 
 translator_t::~translator_t()
@@ -38,7 +38,6 @@ void translator_t::translate(astree_t* root)
 
 void translator_t::translate_program(astree_t* root)
 {
-    stream << ".globl main\n";
     vector<astree_t*> functions = root->get_childs();
     for(int i = 0; i < functions.size(); ++i)
     {
@@ -50,20 +49,41 @@ void translator_t::translate_function(astree_t* function_root)
 {
     vector<astree_t*> tmp = function_root->get_childs();
 
-    stream << tmp[0]->get_unit().get_value() << ":\n";
+    string function_name = tmp[0]->get_unit().get_value();
+
+    current_function = function_name;
+    functions[function_name] = function_state_t();
+
+    stream << ".globl " << function_name << "\n";
+    stream << function_name << ":\n";
     stream << "pushl %ebp\n";
     stream << "movl %esp, %ebp\n\n";
+
     translate_body(tmp[2]);
-    stream << "addl $" << stack_offset << ", %esp\n";
     stream << line.str();
-    stream << "\nleave\nret\n";
+    line.str("");
 }
 
 void translator_t::translate_body(astree_t* body_root)
 {
-    vector<astree_t*> tmp = body_root->get_childs()[0]->get_childs();
+    vector<astree_t*> body = body_root->get_childs();
 
-    translate_expr(tmp[0]);
+    for(int i = 0; i < body.size(); i++)
+    {
+        astree_t* current = body[i];
+        if(0 == current->get_unit().get_name().compare(syntaxtype::RETURN))
+        {
+            translate_return(current);
+        }
+    }
+}
+
+void translator_t::translate_return(astree_t* return_root)
+{
+    astree_t* expression = return_root->get_childs()[0];
+    translate_expr(expression);
+    push("eax", true);
+    stream << "\nleave\nret\n";
 }
 
 void translator_t::translate_expr(astree_t* expr)
@@ -83,19 +103,19 @@ void translator_t::translate_expr(astree_t* expr)
 
 void translator_t::push(string value, bool reg)
 {
-    current_offset -= INTEGER_OFFSET;
-    if(current_offset < stack_offset)
+    functions[current_function].current_offset -= INTEGER_OFFSET;
+    if(functions[current_function].current_offset < functions[current_function].stack_offset)
     {
-        stack_offset -= INTEGER_OFFSET;
+        functions[current_function].stack_offset -= INTEGER_OFFSET;
     }
 
     if(!reg)
     {
-        line << "movl $" << value << ", " << current_offset << "(%ebp)\n";
+        line << "movl $" << value << ", " << functions[current_function].current_offset << "(%ebp)\n";
     }
     else
     {
-        line << "movl %" << value << ", " << current_offset << "(%ebp)\n";
+        line << "movl %" << value << ", " << functions[current_function].current_offset << "(%ebp)\n";
     }
 
 }
@@ -122,7 +142,7 @@ void translator_t::make_operation(string operation)
         push("edx", true);
         line << "movl %eax, %edx\n";
         line << "sarl $31, %edx\n";
-        line << "idivl " << current_offset << "(%ebp)\n";
+        line << "idivl " << functions[current_function].current_offset << "(%ebp)\n";
         pop("edx");
         push("eax", true);
         return;
@@ -134,6 +154,6 @@ void translator_t::make_operation(string operation)
 
 void translator_t::pop(string reg)
 {
-    line << "movl "<< current_offset << "(%ebp), %" << reg << "\n";
-    current_offset += INTEGER_OFFSET;
+    line << "movl "<< functions[current_function].current_offset << "(%ebp), %" << reg << "\n";
+    functions[current_function].current_offset += INTEGER_OFFSET;
 }
