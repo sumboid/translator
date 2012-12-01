@@ -71,9 +71,26 @@ void translator_t::translate_body(astree_t* body_root)
     for(int i = 0; i < body.size(); i++)
     {
         astree_t* current = body[i];
-        if(0 == current->get_unit().get_name().compare(syntaxtype::RETURN))
+        string unit_name = current->get_unit().get_name();
+        if(0 == unit_name.compare(syntaxtype::RETURN))
         {
             translate_return(current);
+        }
+        else if(0 == unit_name.compare(syntaxtype::DECL))
+        {
+            if(functions[current_function].variables.find(current->get_childs()[0]->get_unit().get_value()) !=
+                    functions[current_function].variables.end())
+            {
+                throw 1;
+            }
+
+            push("0", false);
+            functions[current_function].variables[current->get_childs()[0]->get_unit().get_value()] = 
+                functions[current_function].current_offset;
+        }
+        else if(0 == unit_name.compare(syntaxtype::ASSIGN))
+        {
+            translate_assign(current);
         }
     }
 }
@@ -83,14 +100,29 @@ void translator_t::translate_return(astree_t* return_root)
     astree_t* expression = return_root->get_childs()[0];
     translate_expr(expression);
     push("eax", true);
-    stream << "\nleave\nret\n";
+    line << "\nleave\nret\n";
+}
+
+void translator_t::translate_assign(astree_t* assign_root)
+{
+    translate_expr(assign_root->get_childs()[1]);
+    pop("eax");
+    line << "movl %eax, " << functions[current_function].variables[assign_root->get_childs()[0]->get_unit().get_value()] << "(%ebp)\n";
 }
 
 void translator_t::translate_expr(astree_t* expr)
 {
     if(expr->is_leaf())
     {
-        push(expr->get_unit().get_value(), false);
+        if(0 == expr->get_unit().get_name().compare(syntaxtype::VAR))
+        {
+            line << "movl " << functions[current_function].variables[expr->get_unit().get_value()] << "(%ebp), %eax\n";
+            push("eax", true);
+        }
+        if(0 == expr->get_unit().get_name().compare(syntaxtype::CONST))
+        {
+            push(expr->get_unit().get_value(), false);
+        }
         return;
     }
 

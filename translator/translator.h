@@ -32,6 +32,7 @@ private:
     void translate_program(astree_t*);
     void translate_function(astree_t*);
     void translate_body(astree_t*);
+    void translate_assign(astree_t*);
     void translate_return(astree_t*);
     void translate_expr(astree_t*);
     void push(std::string, bool);
