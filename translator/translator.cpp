@@ -52,20 +52,27 @@ void translator_t::translate_function(astree_t* function_root)
     current_function = function_name;
     functions[function_name] = function_state_t();
 
-    vector<astree_t*> args = tmp[1]->get_childs();
-    functions[current_function].args_number = args.size();
-
-    for(int i = 0; i < args.size(); i++)
+    if(!tmp[1]->is_leaf())
     {
-        functions[current_function].variables[args[i]->get_childs()[0]->get_unit().get_value()] = INTEGER_OFFSET * (i + 1);
+        vector<astree_t*> args = tmp[1]->get_childs();
+        functions[current_function].args_number = args.size();
+
+        for(int i = 0; i < args.size(); i++)
+        {
+            functions[current_function].variables[args[i]->get_childs()[0]->get_unit().get_value()] = INTEGER_OFFSET * (i + 2);
+        }
+    }
+    else
+    {
+        functions[current_function].args_number = 0;
     }
 
     stream << ".globl " << function_name << "\n";
     stream << function_name << ":\n";
     stream << "pushl %ebp\n";
     stream << "movl %esp, %ebp\n\n";
-
     translate_body(tmp[2]);
+    stream << "addl $" << functions[function_name].stack_offset << ", %esp\n";
     stream << line.str();
     line.str("");
 }
@@ -105,7 +112,7 @@ void translator_t::translate_return(astree_t* return_root)
 {
     astree_t* expression = return_root->get_childs()[0];
     translate_expr(expression);
-    push("eax", true);
+    pop("eax");
     line << "\nleave\nret\n";
 }
 
@@ -129,41 +136,42 @@ void translator_t::translate_expr(astree_t* expr)
         {
             push(expr->get_unit().get_value(), false);
         }
-        else if(0 == expr->get_unit().get_name().compare(syntaxtype::FUNCALL))
+        return;
+    }
+    else if(0 == expr->get_unit().get_name().compare(syntaxtype::FUNCALL))
+    {
+        string function_name = expr->get_unit().get_value();
+        astree_t* args_root = expr->get_childs()[0];
+
+        if(!args_root->is_leaf())
         {
-            string function_name = expr->get_unit().get_value();
-            astree_t* args_root = expr->get_childs()[0];
-
-            if(!args_root->is_leaf())
+            vector<astree_t*> args = args_root->get_childs();
+            if(functions[function_name].args_number != args.size())
             {
-                vector<astree_t*> args = args_root->get_childs();
-                if(functions[function_name].args_number != args.size())
-                {
-                    throw 1;
-                }
-
-                for(int i = 0; i < args.size(); i++)
-                {
-                    translate_expr(args[i]);
-                }
-
-                line << "call " << function_name << "\n";
-                for(int i = 0; i < args.size(); i++)
-                {
-                    pop("edx");
-                }
-            }
-            else
-            {
-                if(0 != functions[function_name].args_number)
-                {
-                    throw 1;
-                }
-                line << "call " << function_name << "\n";
+                throw 1;
             }
 
-            push("eax", true);
+            for(int i = 0; i < args.size(); i++)
+            {
+                translate_expr(args[i]);
+            }
+
+            line << "call " << function_name << "\n";
+            for(int i = 0; i < args.size(); i++)
+            {
+                pop("edx");
+            }
         }
+        else
+        {
+            if(0 != functions[function_name].args_number)
+            {
+                throw 1;
+            }
+            line << "call " << function_name << "\n";
+        }
+
+        push("eax", true);
         return;
     }
 
