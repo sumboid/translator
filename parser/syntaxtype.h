@@ -18,6 +18,8 @@ namespace syntaxtype
     static const char* FUNC_BODY = "body";
     static const char* FUNCALL = "funcall";
     static const char* RETURN = "return";
+    static const char* IF = "if";
+    static const char* CONDITION = "condition";
 }
 
 #endif /* end of include guard: SYNTAXTYPE_H */

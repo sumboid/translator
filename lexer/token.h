@@ -10,6 +10,9 @@ enum token_type
     VARIABLE,
     ASSIGN,
     TYPE,
+    IF,
+    LESS,
+    MORE,
     COMMA,
     RETURN,
     END_OF_FILE

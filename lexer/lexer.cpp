@@ -29,6 +29,10 @@ using std::map;
     terminals["="] = ASSIGN;
     terminals[","] = COMMA;
 
+    terminals["if"] = IF;
+    terminals["<"] = LESS;
+    terminals[">"] = MORE;
+
     terminals["return"] = RETURN;
 
     next(); //get first token

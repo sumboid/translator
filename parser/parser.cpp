@@ -53,7 +53,7 @@ astree_t* parser_t::parse_func()
 {
     astree_t* decl_func_root = parse_decl();
     decl_func_root->add_child(parse_func_args());
-    decl_func_root->add_child(parse_func_body());
+    decl_func_root->add_child(parse_body());
 
     return decl_func_root;
 }
@@ -92,7 +92,7 @@ astree_t* parser_t::parse_func_args()
     return args_root;
 }
 
-astree_t* parser_t::parse_func_body()
+astree_t* parser_t::parse_body()
 {
     if(!check(lexer->peek(), "{"))
     {
@@ -119,6 +119,10 @@ astree_t* parser_t::parse_func_body()
             body_root->add_child(child);
         }
         else if((child = parse_return()) != 0)
+        {
+            body_root->add_child(child);
+        }
+        else if((child = parse_if()) != 0)
         {
             body_root->add_child(child);
         }
@@ -151,6 +155,40 @@ astree_t* parser_t::parse_return()
     return_root->add_child(parse_expr());
     return return_root;
 }
+
+astree_t* parser_t::parse_if()
+{
+    token_t return_token = lexer->peek();
+    if(return_token.type != IF)
+    {
+        return 0;
+    }
+    lexer->next();
+
+    astree_t* return_root = new astree_t(syntaxunit_t(syntaxtype::IF));
+    lexer->next();
+    if(!check(lexer->peek(), "("))
+    {
+        throw logic_error(BRACKET_EXPECTED_ERROR);
+    }
+    lexer->next();
+    astree_t* condition = parse_condition();
+    if(condition == 0)
+    {
+        throw logic_error("PARSE ERROR");
+    }
+
+    if(!check(lexer->peek(), ")"))
+    {
+        throw logic_error(BRACKET_EXPECTED_ERROR);
+    }
+    lexer->next();
+
+
+    return_root->add_child(parse_expr());
+    return return_root;
+}
+
 
 bool parser_t::check_delimiter()
 {
