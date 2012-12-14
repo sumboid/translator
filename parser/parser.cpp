@@ -125,6 +125,7 @@ astree_t* parser_t::parse_body()
         else if((child = parse_if()) != 0)
         {
             body_root->add_child(child);
+            continue;
         }
         else
         {
@@ -163,7 +164,6 @@ astree_t* parser_t::parse_if()
     {
         return 0;
     }
-    lexer->next();
 
     astree_t* return_root = new astree_t(syntaxunit_t(S_IF));
     lexer->next();
@@ -213,6 +213,8 @@ astree_t* parser_t::parse_condition()
         return 0;
     }
 
+
+    lexer->next();
     astree_t* right = parse_expr();
     if(left == 0)
     {

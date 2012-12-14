@@ -115,7 +115,7 @@ void translator_t::translate_if(astree_t* if_root)
 
     int label = translate_condition(condition);
     translate_body(body);
-    stream << "label" << label << ":\n";
+    line << "label" << label << ":\n";
 }
 
 int translator_t::translate_condition(astree_t* condition)
@@ -126,20 +126,20 @@ int translator_t::translate_condition(astree_t* condition)
     translate_expr(left_expression);
     pop("eax");
     pop("ebx");
-    stream << "cmpl %ebx, %eax" << "\n";
+    line << "cmpl %ebx, %eax" << "\n";
     SyntaxunitType comp = condition->get_unit().get_name();
     switch(comp)
     {
-        case S_LESS: stream << "jge ";
+        case S_LESS: line << "jge ";
                    break;
-        case S_MORE: stream << "jle ";
+        case S_MORE: line << "jle ";
                    break;
-        case S_EQUALS: stream << "jne ";
+        case S_EQUALS: line << "jne ";
                    break;
         default: break;
     }
 
-    stream << "label" << label_number << "\n";
+    line << "label" << label_number << "\n";
     return label_number++;
 }
 
