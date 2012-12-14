@@ -34,6 +34,8 @@ private:
     void translate_program(astree_t*);
     void translate_function(astree_t*);
     void translate_body(astree_t*);
+    void translate_if(astree_t*);
+    int  translate_condition(astree_t*);
     void translate_assign(astree_t*);
     void translate_return(astree_t*);
     void translate_expr(astree_t*);
@@ -43,6 +45,8 @@ private:
 
     std::map<std::string, function_state_t> functions;
     std::string current_function;
+
+    int label_number;
 
     std::ostream& stream;
     std::stringstream line;

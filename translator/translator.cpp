@@ -6,11 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-/* offset table
- * vars on stack
- * only int == 4
- * only one function
- */
+
 namespace
 {
     const int INTEGER_OFFSET = 4;
@@ -21,7 +17,7 @@ using std::vector;
 using std::string;
 
 translator_t::translator_t(ostream& _stream)
-    :stream(_stream)
+    :stream(_stream), label_number(0)
 {}
 
 translator_t::~translator_t()
@@ -105,7 +101,46 @@ void translator_t::translate_body(astree_t* body_root)
         {
             translate_assign(current);
         }
+        else if(unit_name == S_IF)
+        {
+            translate_if(current);
+        }
     }
+}
+
+void translator_t::translate_if(astree_t* if_root)
+{
+    astree_t* condition = if_root->get_childs()[0];
+    astree_t* body = if_root->get_childs()[1];
+
+    int label = translate_condition(condition);
+    translate_body(body);
+    stream << "label" << label << ":\n";
+}
+
+int translator_t::translate_condition(astree_t* condition)
+{
+    astree_t* left_expression = condition->get_childs()[0];
+    astree_t* right_expression = condition->get_childs()[1];
+    translate_expr(right_expression);
+    translate_expr(left_expression);
+    pop("eax");
+    pop("ebx");
+    stream << "cmpl %ebx, %eax" << "\n";
+    SyntaxunitType comp = condition->get_unit().get_name();
+    switch(comp)
+    {
+        case S_LESS: stream << "jge ";
+                   break;
+        case S_MORE: stream << "jle ";
+                   break;
+        case S_EQUALS: stream << "jne ";
+                   break;
+        default: break;
+    }
+
+    stream << "label" << label_number << "\n";
+    return label_number++;
 }
 
 void translator_t::translate_return(astree_t* return_root)

@@ -19,6 +19,7 @@ namespace
     const string ASSIGN_EXPECTED_ERROR = "Assign was expected";
     const string TYPE_EXPECTED_ERROR = "Name of type was expected";
     const string VARIABLE_EXPECTED_ERROR = "Name of variable was expected";
+    const string EXPRESSION_EXPECTED_ERROR = "Expression was expected";
 
 
     bool check(token_t token, const std::string& cmp)
@@ -67,7 +68,6 @@ astree_t* parser_t::parse_func_args()
     lexer->next();
 
     astree_t* args_root = new astree_t(syntaxunit_t(S_FUNC_ARGS));
-    bool kill = false;
 
     while(true)
     {
@@ -122,10 +122,10 @@ astree_t* parser_t::parse_body()
         {
             body_root->add_child(child);
         }
-       // else if((child = parse_if()) != 0)
-       // {
-       //     body_root->add_child(child);
-       // }
+        else if((child = parse_if()) != 0)
+        {
+            body_root->add_child(child);
+        }
         else
         {
             throw logic_error(WTF_ERROR);
@@ -167,31 +167,71 @@ astree_t* parser_t::parse_if()
 
     astree_t* return_root = new astree_t(syntaxunit_t(S_IF));
     lexer->next();
-    if(!check(lexer->peek(), "("))
-    {
-        throw logic_error(BRACKET_EXPECTED_ERROR);
-    }
-    lexer->next();
+
     astree_t* condition = parse_condition();
     if(condition == 0)
     {
         throw logic_error("PARSE ERROR");
     }
 
-    if(!check(lexer->peek(), ")"))
-    {
-        throw logic_error(BRACKET_EXPECTED_ERROR);
-    }
-    lexer->next();
-
-
-    return_root->add_child(parse_expr());
+    return_root->add_child(condition);
+    return_root->add_child(parse_body());
     return return_root;
 }
 
 astree_t* parser_t::parse_condition()
 {
-    return 0;
+    if(!check(lexer->peek(), "("))
+    {
+        throw logic_error(BRACKET_EXPECTED_ERROR);
+    }
+    lexer->next();
+
+    astree_t* left = parse_expr();
+    if(left == 0)
+    {
+        return 0;
+    }
+
+    astree_t* condition = 0;
+
+    if(lexer->peek().type == MORE)
+    {
+        condition = new astree_t(syntaxunit_t(S_MORE));
+    }
+    else if(lexer->peek().type == LESS)
+    {
+        condition = new astree_t(syntaxunit_t(S_LESS));
+    }
+    else if (lexer->peek().type == EQUALS)
+    {
+        condition = new astree_t(syntaxunit_t(S_EQUALS));
+    }
+    else
+    {
+        delete left;
+        return 0;
+    }
+
+    astree_t* right = parse_expr();
+    if(left == 0)
+    {
+        delete left;
+        delete condition;
+        return 0;
+    }
+
+    condition->add_child(left);
+    condition->add_child(right);
+
+    if(!check(lexer->peek(), ")"))
+    {
+        throw logic_error(BRACKET_EXPECTED_ERROR);
+    }
+
+    lexer->next();
+
+    return condition;
 }
 
 
