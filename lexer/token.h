@@ -14,6 +14,7 @@ enum token_type
     LESS,
     MORE,
     EQUALS,
+    WHILE,
     COMMA,
     RETURN,
     END_OF_FILE

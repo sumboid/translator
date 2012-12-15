@@ -1,8 +1,14 @@
+int foo(int k)
+{
+    if(k eq 0)
+    {
+        return 0;
+    }
+
+    return k + foo(k - 1);
+}
+
 int main()
 {
-    if(2 > 1)
-    {
-        return 1;
-    }
-    return 0;
+    return foo(5);
 }

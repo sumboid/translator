@@ -73,9 +73,10 @@ void translator_t::translate_function(astree_t* function_root)
     line.str("");
 }
 
-void translator_t::translate_body(astree_t* body_root)
+vector<string> translator_t::translate_body(astree_t* body_root)
 {
     vector<astree_t*> body = body_root->get_childs();
+    vector<string> variables;
 
     for(int i = 0; i < body.size(); i++)
     {
@@ -87,15 +88,17 @@ void translator_t::translate_body(astree_t* body_root)
         }
         else if(unit_name == S_DECL)
         {
-            if(functions[current_function].variables.find(current->get_childs()[0]->get_unit().get_value()) !=
+            string variable = current->get_childs()[0]->get_unit().get_value();
+            if(functions[current_function].variables.find(variable) !=
                     functions[current_function].variables.end())
             {
                 throw 1;
             }
 
             push("0", false);
-            functions[current_function].variables[current->get_childs()[0]->get_unit().get_value()] = 
+            functions[current_function].variables[variable] = 
                 functions[current_function].current_offset;
+            variables.push_back(variable);
         }
         else if(unit_name == S_ASSIGN)
         {
@@ -106,6 +109,8 @@ void translator_t::translate_body(astree_t* body_root)
             translate_if(current);
         }
     }
+
+    return variables;
 }
 
 void translator_t::translate_if(astree_t* if_root)
@@ -114,7 +119,12 @@ void translator_t::translate_if(astree_t* if_root)
     astree_t* body = if_root->get_childs()[1];
 
     int label = translate_condition(condition);
-    translate_body(body);
+    vector<string> variables = translate_body(body);
+    for(int i = 0; i < variables.size(); i++)
+    {
+        functions[current_function].variables.erase(variables[i]);
+        pop("ebx");
+    }
     line << "label" << label << ":\n";
 }
 
@@ -189,13 +199,11 @@ void translator_t::translate_expr(astree_t* expr)
             for(int i = 0; i < args.size(); i++)
             {
                 translate_expr(args[i]);
+                pop("eax");
+                line << "movl %eax, " << i * INTEGER_OFFSET << "(%esp)\n";
             }
 
             line << "call " << function_name << "\n";
-            for(int i = 0; i < args.size(); i++)
-            {
-                pop("edx");
-            }
         }
         else
         {

@@ -32,7 +32,7 @@ using std::map;
     terminals["if"] = IF;
     terminals["<"] = LESS;
     terminals[">"] = MORE;
-    terminals["=="] = EQUALS;
+    terminals["eq"] = EQUALS;
 
     terminals["return"] = RETURN;
 
@@ -162,10 +162,8 @@ bool lexer_t::check_eof()
 
 void lexer_t::flush_spaces()
 {
-    //std::cout << (void*)buffer.peek() << '?' << std::endl;
     while(buffer.peek() == '\n' || buffer.peek() == '\r' || buffer.peek() == '\t' || buffer.peek() == ' ')
     {
-      //  std::cout << "flush: " << (void*)buffer.peek() << std::endl;
         buffer.next();
     }
 }

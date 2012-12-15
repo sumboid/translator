@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <vector>
 #include <sstream>
 
 #include "../parser/astree.h"
@@ -33,7 +34,7 @@ public:
 private:
     void translate_program(astree_t*);
     void translate_function(astree_t*);
-    void translate_body(astree_t*);
+    std::vector<std::string> translate_body(astree_t*);
     void translate_if(astree_t*);
     int  translate_condition(astree_t*);
     void translate_assign(astree_t*);
