@@ -32,6 +32,7 @@ using std::map;
     terminals["if"] = IF;
     terminals["<"] = LESS;
     terminals[">"] = MORE;
+    terminals["=="] = EQUALS;
 
     terminals["return"] = RETURN;
 

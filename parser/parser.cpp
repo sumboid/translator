@@ -40,7 +40,7 @@ parser_t::~parser_t()
 
 void parser_t::parse()
 {
-    ast_root = new astree_t(syntaxunit_t("program"));
+    ast_root = new astree_t(syntaxunit_t(S_PROGRAM));
     while(lexer->peek().type != END_OF_FILE)
     {
         ast_root->add_child(parse_func());
@@ -66,7 +66,7 @@ astree_t* parser_t::parse_func_args()
     }
     lexer->next();
 
-    astree_t* args_root = new astree_t(syntaxunit_t(syntaxtype::FUNC_ARGS));
+    astree_t* args_root = new astree_t(syntaxunit_t(S_FUNC_ARGS));
     bool kill = false;
 
     while(true)
@@ -100,7 +100,7 @@ astree_t* parser_t::parse_body()
     }
 
     lexer->next();
-    astree_t* body_root = new astree_t(syntaxunit_t(syntaxtype::FUNC_BODY));
+    astree_t* body_root = new astree_t(syntaxunit_t(S_FUNC_BODY));
 
     while(!check(lexer->peek(), "}"))
     {
@@ -122,10 +122,10 @@ astree_t* parser_t::parse_body()
         {
             body_root->add_child(child);
         }
-        else if((child = parse_if()) != 0)
-        {
-            body_root->add_child(child);
-        }
+       // else if((child = parse_if()) != 0)
+       // {
+       //     body_root->add_child(child);
+       // }
         else
         {
             throw logic_error(WTF_ERROR);
@@ -146,7 +146,7 @@ astree_t* parser_t::parse_return()
     }
     lexer->next();
 
-    astree_t* return_root = new astree_t(syntaxunit_t(syntaxtype::RETURN));
+    astree_t* return_root = new astree_t(syntaxunit_t(S_RETURN));
     if(lexer->peek().type == DELIMITER)
     {
         return return_root;
@@ -165,7 +165,7 @@ astree_t* parser_t::parse_if()
     }
     lexer->next();
 
-    astree_t* return_root = new astree_t(syntaxunit_t(syntaxtype::IF));
+    astree_t* return_root = new astree_t(syntaxunit_t(S_IF));
     lexer->next();
     if(!check(lexer->peek(), "("))
     {
@@ -187,6 +187,11 @@ astree_t* parser_t::parse_if()
 
     return_root->add_child(parse_expr());
     return return_root;
+}
+
+astree_t* parser_t::parse_condition()
+{
+    return 0;
 }
 
 
@@ -225,7 +230,7 @@ astree_t* parser_t::parse_assign(astree_t* var)
 
     lexer->next();
 
-    astree_t* assign_root = new astree_t(syntaxunit_t(syntaxtype::ASSIGN));
+    astree_t* assign_root = new astree_t(syntaxunit_t(S_ASSIGN));
     assign_root->add_child(var);
     assign_root->add_child(parse_expr());
     return assign_root;
@@ -256,7 +261,7 @@ astree_t* parser_t::parse_type()
         throw logic_error(TYPE_EXPECTED_ERROR + ": \'" + token.value + "\'");
     }
 
-    astree_t* decl = new astree_t(syntaxunit_t(syntaxtype::DECL, token.value));
+    astree_t* decl = new astree_t(syntaxunit_t(S_DECL, token.value));
     lexer->next();
     return decl;
 }
@@ -269,7 +274,7 @@ astree_t* parser_t::parse_name()
         throw logic_error(VARIABLE_EXPECTED_ERROR + ": \'" + token.value + "\'");
     }
 
-    astree_t* var = new astree_t(syntaxunit_t(syntaxtype::VAR, token.value));
+    astree_t* var = new astree_t(syntaxunit_t(S_VAR, token.value));
     lexer->next();
     return var;
 }
@@ -295,11 +300,11 @@ astree_t* parser_t::parse_expr()
         syntaxunit_t current_unit;
         if(check(token, "+"))
         {
-            current_unit = syntaxunit_t(syntaxtype::ADD);
+            current_unit = syntaxunit_t(S_ADD);
         }
         else if(check(token, "-"))
         {
-            current_unit = syntaxunit_t(syntaxtype::SUB);
+            current_unit = syntaxunit_t(S_SUB);
         }
         else
         {
@@ -328,11 +333,11 @@ astree_t* parser_t::parse_fact()
         syntaxunit_t current_unit;
         if(check(token, "*"))
         {
-            current_unit = syntaxunit_t(syntaxtype::MUL);
+            current_unit = syntaxunit_t(S_MUL);
         }
         else if(check(token, "/"))
         {
-            current_unit = syntaxunit_t(syntaxtype::DIV);
+            current_unit = syntaxunit_t(S_DIV);
         }
         else
         {
@@ -358,7 +363,7 @@ astree_t* parser_t::parse_pow()
 
     if(check(token, "^"))
     {
-        syntaxunit_t pow_unit(syntaxtype::POW);
+        syntaxunit_t pow_unit(S_POW);
         local_root = new astree_t(pow_unit);
         lexer->next();
         astree_t* left = parse_pow();
@@ -375,7 +380,7 @@ astree_t* parser_t::parse_number() //XXX: RENAME!
     if(token.type == NUMBER)
     {
         lexer->next();
-        syntaxunit_t const_unit(syntaxtype::CONST, token.value);
+        syntaxunit_t const_unit(S_CONST, token.value);
         local_root = new astree_t(const_unit);
     }
     else if(token.type == VARIABLE)
@@ -383,13 +388,13 @@ astree_t* parser_t::parse_number() //XXX: RENAME!
         lexer->next();
         if(check(lexer->peek(), "("))
         {
-            syntaxunit_t funcall_unit(syntaxtype::FUNCALL, token.value);
+            syntaxunit_t funcall_unit(S_FUNCALL, token.value);
             local_root = new astree_t(funcall_unit);
             local_root->add_child(parse_funcall());
         }
         else
         {
-            syntaxunit_t var_unit(syntaxtype::VAR, token.value);
+            syntaxunit_t var_unit(S_VAR, token.value);
             local_root = new astree_t(var_unit);
         }
     }
@@ -423,7 +428,7 @@ astree_t* parser_t::parse_funcall()
     }
     lexer->next();
 
-    astree_t* args_root = new astree_t(syntaxunit_t(syntaxtype::FUNC_ARGS));
+    astree_t* args_root = new astree_t(syntaxunit_t(S_FUNC_ARGS));
     bool kill = false;
 
     while(!check(lexer->peek(), ")"))

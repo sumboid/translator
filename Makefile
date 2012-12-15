@@ -1,5 +1,5 @@
-cxx      := g++
-cxxflags := -Ofast -march=native -Wall
+CXX      := g++
+CXXFLAGS := -O0 -g  -Wall
 objs     := main.o \
 			lexer/buffer.o \
 			lexer/lexer.o \
@@ -12,10 +12,7 @@ bin      := t
 all: $(bin)
 
 $(bin): $(objs)
-	$(cxx) $(objs) -o $(bin)
-
-%.o: %.c
-	$(cxx) $(cxxflags) -c $<
+	$(CXX) $(objs) -o $(bin)
 
 clean:
 	rm -f $(objs) $(bin)

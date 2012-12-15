@@ -2,20 +2,21 @@
 #define SYNTAXUNIT_H
 
 #include <string>
+#include "syntaxtype.h"
 
 class syntaxunit_t
 {
 public:
     syntaxunit_t();
-    syntaxunit_t (const std::string& unit_name);
-    syntaxunit_t (const std::string& unit_name,
+    syntaxunit_t (SyntaxunitType unit);
+    syntaxunit_t (SyntaxunitType unit,
                   const std::string& value);
 
     std::string& get_value();
-    std::string& get_name();
+    SyntaxunitType& get_name();
     bool has_value();
 private:
-    std::string unit_name;
+    SyntaxunitType unit_name;
     std::string value;
 };
 

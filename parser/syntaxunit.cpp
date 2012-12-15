@@ -12,11 +12,11 @@ using std::logic_error;
 
 syntaxunit_t::syntaxunit_t() {}
 
-syntaxunit_t::syntaxunit_t(const string& _unit_name)
+syntaxunit_t::syntaxunit_t(SyntaxunitType _unit_name)
     :unit_name(_unit_name)
 {}
 
-syntaxunit_t::syntaxunit_t(const string& _unit_name,
+syntaxunit_t::syntaxunit_t(SyntaxunitType _unit_name,
                            const string& _value)
     :unit_name(_unit_name), value(_value)
 {}
@@ -32,7 +32,7 @@ std::string& syntaxunit_t::get_value()
         throw logic_error(NO_VALUE_ERROR);
     }
 }
-std::string& syntaxunit_t::get_name()
+SyntaxunitType& syntaxunit_t::get_name()
 {
     return unit_name;
 }

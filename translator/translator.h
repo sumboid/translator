@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "../parser/astree.h"
+#include "../parser/syntaxtype.h"
 
 struct function_state_t
 {
@@ -38,7 +39,7 @@ private:
     void translate_expr(astree_t*);
     void push(std::string, bool);
     void pop(std::string);
-    void make_operation(std::string);
+    void make_operation(SyntaxunitType);
 
     std::map<std::string, function_state_t> functions;
     std::string current_function;

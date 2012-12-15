@@ -13,6 +13,7 @@ enum token_type
     IF,
     LESS,
     MORE,
+    EQUALS,
     COMMA,
     RETURN,
     END_OF_FILE

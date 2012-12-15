@@ -1,25 +1,28 @@
 #ifndef SYNTAXTYPE_H
 #define SYNTAXTYPE_H
 
-namespace syntaxtype
+enum SyntaxunitType
 {
-    static const char* PROGRAM = "program";
-    static const char* DECL = "decl";
-    static const char* ADD = "add";
-    static const char* SUB = "sub";
-    static const char* MUL = "mul";
-    static const char* DIV = "div";
-    static const char* POW = "pow";
-    static const char* ASSIGN = "assign";
-    static const char* CONST = "const";
-    static const char* VAR = "var";
-    static const char* FUNC = "func";
-    static const char* FUNC_ARGS = "arg-list";
-    static const char* FUNC_BODY = "body";
-    static const char* FUNCALL = "funcall";
-    static const char* RETURN = "return";
-    static const char* IF = "if";
-    static const char* CONDITION = "condition";
-}
+    S_PROGRAM,
+    S_DECL,
+    S_ADD,
+    S_SUB,
+    S_MUL,
+    S_DIV,
+    S_POW,
+    S_ASSIGN,
+    S_CONST,
+    S_VAR,
+    S_FUNC,
+    S_FUNC_ARGS,
+    S_FUNC_BODY,
+    S_FUNCALL,
+    S_RETURN,
+    S_IF,
+    S_CONDITION,
+    S_LESS,
+    S_MORE,
+    S_EQUALS
+};
 
 #endif /* end of include guard: SYNTAXTYPE_H */

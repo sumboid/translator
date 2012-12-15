@@ -84,12 +84,12 @@ void translator_t::translate_body(astree_t* body_root)
     for(int i = 0; i < body.size(); i++)
     {
         astree_t* current = body[i];
-        string unit_name = current->get_unit().get_name();
-        if(0 == unit_name.compare(syntaxtype::RETURN))
+        SyntaxunitType unit_name = current->get_unit().get_name();
+        if(unit_name == S_RETURN)
         {
             translate_return(current);
         }
-        else if(0 == unit_name.compare(syntaxtype::DECL))
+        else if(unit_name == S_DECL)
         {
             if(functions[current_function].variables.find(current->get_childs()[0]->get_unit().get_value()) !=
                     functions[current_function].variables.end())
@@ -101,7 +101,7 @@ void translator_t::translate_body(astree_t* body_root)
             functions[current_function].variables[current->get_childs()[0]->get_unit().get_value()] = 
                 functions[current_function].current_offset;
         }
-        else if(0 == unit_name.compare(syntaxtype::ASSIGN))
+        else if(unit_name == S_ASSIGN)
         {
             translate_assign(current);
         }
@@ -127,18 +127,18 @@ void translator_t::translate_expr(astree_t* expr)
 {
     if(expr->is_leaf())
     {
-        if(0 == expr->get_unit().get_name().compare(syntaxtype::VAR))
+        if(expr->get_unit().get_name() == S_VAR)
         {
             line << "movl " << functions[current_function].variables[expr->get_unit().get_value()] << "(%ebp), %eax\n";
             push("eax", true);
         }
-        else if(0 == expr->get_unit().get_name().compare(syntaxtype::CONST))
+        else if(expr->get_unit().get_name() == S_CONST)
         {
             push(expr->get_unit().get_value(), false);
         }
         return;
     }
-    else if(0 == expr->get_unit().get_name().compare(syntaxtype::FUNCALL))
+    else if(expr->get_unit().get_name() == S_FUNCALL)
     {
         string function_name = expr->get_unit().get_value();
         astree_t* args_root = expr->get_childs()[0];
@@ -201,24 +201,24 @@ void translator_t::push(string value, bool reg)
 
 }
 
-void translator_t::make_operation(string operation)
+void translator_t::make_operation(SyntaxunitType operation)
 {
     pop("eax");
     pop("edx");
 
-    if(0 == operation.compare(syntaxtype::ADD))
+    if(operation == S_ADD)
     {
         line << "addl ";
     }
-    if(0 == operation.compare(syntaxtype::SUB))
+    if(operation == S_SUB)
     {
         line << "subl ";
     }
-    if(0 == operation.compare(syntaxtype::MUL))
+    if(operation == S_MUL)
     {
         line << "imull ";
     }
-    if(0 == operation.compare(syntaxtype::DIV))
+    if(operation == S_DIV)
     {
         push("edx", true);
         line << "movl %eax, %edx\n";
