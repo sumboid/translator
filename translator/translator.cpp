@@ -108,9 +108,31 @@ vector<string> translator_t::translate_body(astree_t* body_root)
         {
             translate_if(current);
         }
+        else if(unit_name == S_WHILE)
+        {
+            translate_while(current);
+        }
     }
 
     return variables;
+}
+
+void translator_t::translate_while(astree_t* while_root)
+{
+    astree_t* condition = while_root->get_childs()[0];
+    astree_t* body = while_root->get_childs()[1];
+
+    int loop_label = label_number++;
+    line << "label" << loop_label << ":\n";
+    int endloop_label = translate_condition(condition);
+    vector<string> variables = translate_body(body);
+    for(int i = 0; i < variables.size(); i++)
+    {
+        functions[current_function].variables.erase(variables[i]);
+        pop("ebx");
+    }
+    line << "jmp label" << loop_label << "\n";
+    line << "label" << endloop_label << ":\n";
 }
 
 void translator_t::translate_if(astree_t* if_root)

@@ -1,14 +1,12 @@
 int foo(int k)
 {
-    if(k eq 0)
+    int p = k;
+    int result = p;
+
+    while(p > 0)
     {
-        return 0;
+        p = p - 1;
+        result = result + p;
     }
-
-    return k + foo(k - 1);
-}
-
-int main()
-{
-    return foo(5);
+    return result;
 }

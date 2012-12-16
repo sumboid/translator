@@ -30,6 +30,7 @@ private:
     astree_t* parse_number();
     astree_t* parse_funcall();
     astree_t* parse_if();
+    astree_t* parse_while();
     astree_t* parse_condition();
 
     bool check_delimiter();

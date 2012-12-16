@@ -19,7 +19,7 @@ enum SyntaxunitType
     S_FUNCALL,
     S_RETURN,
     S_IF,
-    S_CONDITION,
+    S_WHILE,
     S_LESS,
     S_MORE,
     S_EQUALS

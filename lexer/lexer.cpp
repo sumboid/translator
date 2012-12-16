@@ -35,6 +35,7 @@ using std::map;
     terminals["eq"] = EQUALS;
 
     terminals["return"] = RETURN;
+    terminals["while"] = WHILE;
 
     next(); //get first token
 }

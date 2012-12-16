@@ -127,6 +127,11 @@ astree_t* parser_t::parse_body()
             body_root->add_child(child);
             continue;
         }
+        else if((child = parse_while()) != 0)
+        {
+            body_root->add_child(child);
+            continue;
+        }
         else
         {
             throw logic_error(WTF_ERROR);
@@ -155,6 +160,28 @@ astree_t* parser_t::parse_return()
 
     return_root->add_child(parse_expr());
     return return_root;
+}
+
+astree_t* parser_t::parse_while()
+{
+    token_t while_token = lexer->peek();
+    if(while_token.type != WHILE)
+    {
+        return 0;
+    }
+
+    astree_t* while_root = new astree_t(syntaxunit_t(S_WHILE));
+    lexer->next();
+
+    astree_t* condition = parse_condition();
+    if(condition == 0)
+    {
+        throw logic_error("PARSE ERROR");
+    }
+
+    while_root->add_child(condition);
+    while_root->add_child(parse_body());
+    return while_root;
 }
 
 astree_t* parser_t::parse_if()

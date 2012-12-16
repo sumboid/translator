@@ -36,6 +36,7 @@ private:
     void translate_function(astree_t*);
     std::vector<std::string> translate_body(astree_t*);
     void translate_if(astree_t*);
+    void translate_while(astree_t*);
     int  translate_condition(astree_t*);
     void translate_assign(astree_t*);
     void translate_return(astree_t*);
