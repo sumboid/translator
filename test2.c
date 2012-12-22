@@ -6,6 +6,6 @@ int main()
 {
     int n;
     scanf("%d", &n);
-    printf("Yoba: %d\n", (int)foo((int32_t)n));
+    printf("Result: %d\n", (int)foo((int32_t)n));
     return 0;
 }

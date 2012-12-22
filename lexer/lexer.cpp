@@ -32,7 +32,7 @@ using std::map;
     terminals["if"] = IF;
     terminals["<"] = LESS;
     terminals[">"] = MORE;
-    terminals["eq"] = EQUALS;
+    terminals["=="] = EQUALS;
 
     terminals["return"] = RETURN;
     terminals["while"] = WHILE;
@@ -102,10 +102,16 @@ bool lexer_t::check_one_symbol_terminal()
 
     if(is_terminal(token))
     {
-        map<string, token_type>::iterator it = terminals.find(token);
-        current_token.type = it->second;
-        current_token.value = it->first;
         buffer.next();
+
+        if(0 == token.compare("=") && '=' == buffer.peek())
+        {
+            token.push_back(buffer.peek());
+            buffer.next();
+        }
+
+        current_token.type = terminals[token];
+        current_token.value = token;
         return true;
     }
 

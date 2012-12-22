@@ -481,6 +481,14 @@ astree_t* parser_t::parse_number() //XXX: RENAME!
             throw -1;
         }
     }
+    else if(token.type == OPERATOR && check(token, "-"))
+    {
+        lexer->next();
+        astree_t* number = parse_number();
+        local_root = new astree_t(syntaxunit_t(S_SUB));
+        local_root->add_child(new astree_t(syntaxunit_t(S_CONST, "0")));
+        local_root->add_child(number);
+    }
     else
     {
         throw -1;
