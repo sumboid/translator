@@ -5,7 +5,7 @@ enum token_type
 {
     NUMBER,
     OPERATOR,
-    BRACKET,     //not enought imagination
+    BRACKET,     //not enough imagination
     DELIMITER,
     VARIABLE,
     ASSIGN,
