@@ -10,5 +10,3 @@ statement-list      ::= def-variable statement-list |
                         ε
 assign-statement    ::= identifier = expr
 return-statement    ::= return expr
-
-ДА ТАК И УМЕРЕТЬ МОЖНО.
